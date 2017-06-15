@@ -28,7 +28,7 @@ class CooperationController extends MainController {
         array_push($this->css['pages'], 'global/plugins/bower_components/fontawesome/css/font-awesome.min.css');
         array_push($this->css['pages'], 'global/plugins/bower_components/animate.css/animate.min.css');
         array_push($this->css['pages'], 'global/plugins/bower_components/datatables/dataTables.bootstrap.css');
-        array_push($this->css['pages'], 'global/plugins/bower_components/datatables/dataTables.responsive.css');
+        array_push($this->css['pages'], 'global/plugins/bower_components/datatables/datatables.responsive.css');
         array_push($this->css['pages'], 'global/plugins/bower_components/select2/select2.min.css');
 
         array_push($this->js['plugins'], 'global/plugins/bower_components/datatables/jquery.dataTables.min.js');

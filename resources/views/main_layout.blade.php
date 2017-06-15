@@ -81,7 +81,7 @@
 
         @if(!empty($js['plugins']))
             @foreach($js['plugins'] as $plugin)
-                <script src="{{url('assets', $plugin)}}"></script>
+                <script src="{{url('assets/' . $plugin)}}"></script>
             @endforeach
         @endif
     <!--/ END PAGE LEVEL PLUGINS -->
