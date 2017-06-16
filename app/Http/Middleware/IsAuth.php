@@ -45,7 +45,6 @@ class IsAuth {
             $user = new User();
             $user->username = $login->payload->identity;
             Auth::login($user);
-            dd($user);
 
             return $next($request);
         }
