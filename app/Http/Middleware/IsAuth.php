@@ -2,16 +2,17 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use parinpan\fanjwt\libs\JWTAuth;
 
-class IsAuth
-{
+class IsAuth {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  \Illuminate\Http\Request $request
+     * @param  \Closure $next
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -35,6 +36,11 @@ class IsAuth
             return redirect()->away('https://akun.usu.ac.id');
         } else
         {
+            $user = new User();
+            $user->username = $login->payload->identity;
+            Auth::login($user);
+            dd($user);
+
             return $next($request);
         }
     }

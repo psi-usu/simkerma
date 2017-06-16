@@ -10,17 +10,10 @@ class DefaultUserSeed extends Seeder {
      */
     public function run()
     {
-        $user = new \App\User();
-        $user = $user->create([
-            'username'   => 'superuser',
-            'password'   => bcrypt('superst4r'),
-            'full_name'  => 'Super User',
-            'email'      => 'kokorochi.zhou@gmail.com',
-            'created_by' => 'seeder'
-        ]);
-        $user->userAuth()->create([
-            'auth_type' => 'SU',
-            'created_by' => 'seeder',
-        ]);
+        $user_auth = new \App\UserAuth();
+        $user_auth->username = '88072116081001';
+        $user_auth->auth_type = 'SU';
+        $user_auth->created_by = 'seeder';
+        $user_auth->save();
     }
 }
