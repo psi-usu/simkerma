@@ -10,6 +10,7 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::get('callback.php', 'CallbackController@callback');
 
 Route::get('user/login', 'UserController@showLoginForm')->name('login');
 Route::post('user/login', 'UserController@doLogin');

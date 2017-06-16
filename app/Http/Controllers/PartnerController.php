@@ -13,7 +13,7 @@ class PartnerController extends MainController {
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('is_auth');
 
         parent::__construct();
 
