@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\User;
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use parinpan\fanjwt\libs\JWTAuth;
 
 class IsAuth {
@@ -33,7 +34,12 @@ class IsAuth {
         );
         if (! $login->logged_in)
         {
-            return redirect()->away('https://akun.usu.ac.id');
+            $url = JWTAuth::makeLink([
+                'baseUrl' => 'https://akun.usu.ac.id/auth/login',
+                'callback' => url('/') . '/callback.php',
+                'redir' => url('/'),
+            ]);
+            return redirect()->away($url);
         } else
         {
             $user = new User();

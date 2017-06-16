@@ -37,6 +37,6 @@ class User extends Authenticatable
 
     public function userAuth()
     {
-        return $this->hasMany(UserAuth::class. 'username', 'username');
+        return $this->hasMany(UserAuth::class, 'username', 'username');
     }
 }
