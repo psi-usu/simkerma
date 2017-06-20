@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserLoginRequest;
 use App\Simsdm;
 use App\User;
+use App\UserAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -15,14 +16,24 @@ use View;
 class UserController extends MainController {
     public function __construct()
     {
+        $this->middleware('is_auth');
         parent::__construct();
 
         array_push($this->css['pages'], 'css/pages/sign.css');
         array_push($this->css['pages'], 'global/plugins/bower_components/fontawesome/css/font-awesome.min.css');
         array_push($this->css['pages'], 'global/plugins/bower_components/animate.css/animate.min.css');
+        array_push($this->css['pages'], 'global/plugins/bower_components/datatables/dataTables.bootstrap.css');
+        array_push($this->css['pages'], 'global/plugins/bower_components/datatables/datatables.responsive.css');
+        array_push($this->css['pages'], 'global/plugins/bower_components/select2/select2.min.css');
 
         array_push($this->js['scripts'], 'global/plugins/bower_components/jquery-validation/dist/jquery.validate.min.js');
+        array_push($this->js['plugins'], 'global/plugins/bower_components/datatables/jquery.dataTables.min.js');
+        array_push($this->js['plugins'], 'global/plugins/bower_components/datatables/dataTables.bootstrap.js');
+        array_push($this->js['plugins'], 'global/plugins/bower_components/datatables/datatables.responsive.js');
+        array_push($this->js['plugins'], 'global/plugins/bower_components/select2/select2.full.min.js');
+
         array_push($this->js['scripts'], 'js/pages/blankon.sign.js');
+        array_push($this->js['scripts'], 'js/customize.js');
 
         View::share('css', $this->css);
         View::share('js', $this->js);
@@ -30,7 +41,102 @@ class UserController extends MainController {
 
     public function index()
     {
-        return view('user.user-list');
+        $page_title = 'User';
+
+        return view('user.user-list', compact('page_title'));
+    }
+
+    public function getAjax()
+    {
+        $user_auths = UserAuth::all();
+        $users = $user_auths->unique('username');
+        $simsdm = new Simsdm();
+
+        $data = [];
+
+        $i = 0;
+        foreach ($users as $user)
+        {
+            $data['data'][$i][0] = $i + 1;
+            $data['data'][$i][1] = $user->username;
+            $data['data'][$i][2] = $simsdm->getEmployee($user->username)->full_name;
+            $auths = $user_auths->filter(function($v, $k) use($user){
+                return $v->username == $user->username;
+            });
+            $data['data'][$i][3] = '';
+            foreach ($auths as $auth)
+            {
+                $data['data'][$i][3] = $data['data'][$i][3] . $auth->auth_type . ' ';
+            }
+            $data['data'][$i][3] = rtrim($data['data'][$i][3]);
+            $i++;
+        }
+
+        $count_data = count($data);
+        if ($count_data == 0)
+        {
+            $data['data'] = [];
+        }else{
+            $count_data = count($data['data']);
+        }
+        $data['iTotalRecords'] = $data['iTotalDisplayRecords'] = $count_data;
+        $data = json_encode($data, JSON_PRETTY_PRINT);
+
+        return response($data, 200)->header('Content-Type', 'application/json');
+    }
+
+    public function create()
+    {
+        $page_title = 'Tambah User';
+        $auths = \App\Auth::all();
+        $upd_mode = 'create';
+        $action_url = 'users/create';
+
+        $simsdm = new Simsdm();
+        $faculties = $simsdm->facultyAll();
+        $units = $simsdm->unitAll();
+        foreach ($faculties as $faculty)
+        {
+            $unit['code'] = $faculty['code'];
+            $unit['name'] = $faculty['name'];
+            $units[] = $unit;
+        }
+        $study_programs = [];
+        foreach ($faculties as $faculty)
+        {
+            $study_program = $simsdm->studyProgram($faculty['code']);
+            if(!empty($study_program))
+            {
+                foreach ($study_program as $item)
+                {
+                    $study_programs[] = $item;
+                }
+            }
+        }
+
+        return view('user.user-detail', compact(
+            'page_title',
+            'auths',
+            'upd_mode',
+            'action_url',
+            'units',
+            'study_programs'
+        ));
+    }
+
+    public function store(StoreUserRequest $request)
+    {
+        dd($request);
+    }
+
+    public function edit()
+    {
+
+    }
+
+    public function update(StoreUserRequest $request)
+    {
+
     }
 
     public function showLoginForm()
@@ -105,13 +211,13 @@ class UserController extends MainController {
 //        return redirect()->intended('user/login');
     }
 
-    public function store(StoreUserRequest $request)
-    {
-        $input = Input::get();
-
-        $user = new User();
-        $user->fill($input);
-        $user->password = bcrypt($request->password);
-        $user->save();
-    }
+//    public function store(StoreUserRequest $request)
+//    {
+//        $input = Input::get();
+//
+//        $user = new User();
+//        $user->fill($input);
+//        $user->password = bcrypt($request->password);
+//        $user->save();
+//    }
 }

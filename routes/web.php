@@ -16,7 +16,13 @@ Route::get('user/login', 'UserController@showLoginForm')->name('login');
 Route::post('user/login', 'UserController@doLogin');
 Route::get('user/logout', 'UserController@doLogout');
 
+Route::get('users', 'UserController@index');
+Route::get('users/create', 'UserController@create');
 Route::post('users/create', 'UserController@store');
+Route::get('users/edit', 'UserController@edit');
+Route::put('users/edit', 'UserController@update');
+Route::delete('users/delete', 'UserController@destroy');
+Route::get('users/ajax', 'UserController@getAjax');
 
 Route::get('/', 'CooperationController@index');
 Route::get('cooperations', 'CooperationController@index');

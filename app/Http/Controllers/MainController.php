@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Simsdm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use View;
@@ -144,11 +145,12 @@ class MainController extends Controller {
         ];
         if (Auth::user())
         {
-            $user = Auth::user();
+            $simsdm = new Simsdm();
+            $user = $simsdm->getEmployee(Auth::user()->username);
             $this->user_info = [
-                'username' => $user->username,
+                'username' => Auth::user()->username,
                 'full_name' => $user->full_name,
-                'email'     => $user->email,
+//                'email'     => $user->email,
             ];
         }
         View::share('user_info', $this->user_info);

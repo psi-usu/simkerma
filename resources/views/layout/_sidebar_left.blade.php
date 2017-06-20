@@ -23,6 +23,7 @@
             <a href="{{url('/')}}">
                 <span class="icon"><i class="fa fa-handshake-o"></i></span>
                 <span class="text">Kerjasama</span>
+                {!! Request::is('/', '/') ? '<span class="selected"></span>' : null !!}
             </a>
         </li>
         {{--<li class="submenu {!! Request::is('cooperations', 'cooperations/soon-ends') ? 'active' : null !!}">--}}
@@ -31,12 +32,12 @@
                 {{--<span class="text">Kerjasama Segera Berakhir</span>--}}
             {{--</a>--}}
         {{--</li>--}}
-        <li class="submenu">
+        <li class="submenu {!! Request::is('partners', 'partners/*', 'units') ? 'active' : null !!}">
             <a href="javascript:void(0);">
                 <span class="icon"><i class="fa fa-dot-circle-o"></i></span>
                 <span class="text">Data Referensi </span>
                 <span class="arrow"></span>
-                <span class="selected"></span>
+                {!! Request::is('partners', 'partners/*', 'units') ? '<span class="selected"></span>' : null !!}
             </a>
             <ul>
                 <li><a href="{{url('partners')}}">Instansi Partner</a></li>
@@ -44,12 +45,19 @@
             </ul>
         </li>
 
-        <li class="submenu" id="menu_admin" style="visibility: hidden;">
-            <a href="user.html">
-                <span class="icon"><i class="fa fa-dot-circle-o"></i></span>
-                <span class="text">User</span>
-            </a>
-        </li>
+        @can('admin-menu')
+            <li class="submenu {!! Request::is('users', 'users/*') ? 'active' : null !!}">
+                <a href="javascript:void(0);">
+                    <span class="icon"><i class="fa fa-lock"></i></span>
+                    <span class="text">Admin </span>
+                    <span class="arrow"></span>
+                    {!! Request::is('users', 'users/*') ? '<span class="selected"></span>' : null !!}
+                </a>
+                <ul>
+                    <li><a href="{{url('users')}}">User</a></li>
+                </ul>
+            </li>
+        @endcan
 
         <!--/ End navigation - dashboard -->
     </ul>

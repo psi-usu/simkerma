@@ -139,6 +139,60 @@ $(document).ready(function () {
         });
     }
 
+    if ($("#user-list").length) {
+        var userDatatable = $("#user-list").dataTable({
+            autoWidth: false,
+            responsive: true,
+            ajax: baseUrl + 'users/ajax',
+            columnDefs: [
+                {
+                    orderable: false,
+                    defaultContent: '<a data-toggle="tooltip" data-placement="top" title="Edit"><button class="btn btn-theme btn-sm rounded edit"><i class="fa fa-pencil" style="color:white;"></i></button></a>' +
+                    '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>',
+                    targets: 4
+                },
+                {
+                    className: "dt-center",
+                    targets: [0, 3, 4]
+                },
+                {
+                    width: "5%",
+                    targets: 0,
+                },
+            ],
+        });
+
+        $(document).on("click", "#user-list a button.delete", function (e) {
+            e.preventDefault();
+            var dt_row = $(this).closest("li").data("dt-row");
+
+            if (dt_row >= 0) {
+                var position = dt_row;
+            } else {
+                var target_row = $(this).closest("tr").get(0);
+                var position = userDatatable.fnGetPosition(target_row);
+            }
+            var username = userDatatable.fnGetData(position)[1];
+
+            $("#delete form").attr("action", baseUrl + "users/delete?username=" + username);
+        });
+
+        $(document).on("click", "#user-list a button.edit", function (e) {
+            e.preventDefault();
+            var dt_row = $(this).closest("li").data("dt-row");
+
+            if (dt_row >= 0) {
+                var position = dt_row;
+            } else {
+                var target_row = $(this).closest("tr").get(0);
+                var position = userDatatable.fnGetPosition(target_row);
+            }
+            var username = userDatatable.fnGetData(position)[1];
+
+            window.open(baseUrl + "users/edit?id=" + username, "_self");
+        });
+    }
+
     if ($("input[name=coop_type]:checked").val() == "MOU") {
         toggleCoopDetail(true, false, false);
     }
@@ -463,42 +517,58 @@ $(document).ready(function () {
 
     $('.table-add').click(function (e) {
         e.preventDefault();
-        var $clone = $("#moa-table").find('tr.hide').clone(true).removeClass('hide table-line');
-        $clone.find("input").attr("disabled", false);
-        $("#moa-table").find('table').append($clone);
-        $(":input").inputmask()
-        $("#tambah_kerma").validate({
-            rules: {
-                "item_name[]": {
-                    required: true
+        if($("#moa-table").length){
+            var v_table = $("#moa-table");
+        }else if($("#user-auth-table").length){
+            var v_table = $("#user-auth-table");
+        }
+        var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
+        if($("#moa-table").length){
+            $clone.find("input").attr("disabled", false);
+        }
+        else if($("#user-auth-table").length){
+            $clone.find("select").attr("disabled", false);
+            $clone.find("select").addClass("select2");
+        }
+        v_table.find('table').append($clone);
+        if($("#moa-table").length) {
+            $(":input").inputmask()
+            $("#tambah_kerma").validate({
+                rules: {
+                    "item_name[]": {
+                        required: true
+                    },
+                    "item_quantity[]": {
+                        required: true
+                    },
+                    "item_uom[]": {
+                        required: true
+                    },
+                    "item_total_amount[]": {
+                        required: true
+                    },
+                    "item_annotation[]": {
+                        required: true
+                    },
                 },
-                "item_quantity[]": {
-                    required: true
+                highlight: function (element) {
+                    $(element).parents('.form-group').addClass('has-error has-feedback');
                 },
-                "item_uom[]": {
-                    required: true
+                unhighlight: function (element) {
+                    $(element).parents('.form-group').removeClass('has-error');
                 },
-                "item_total_amount[]": {
-                    required: true
-                },
-                "item_annotation[]": {
-                    required: true
-                },
-            },
-            highlight: function (element) {
-                $(element).parents('.form-group').addClass('has-error has-feedback');
-            },
-            unhighlight: function (element) {
-                $(element).parents('.form-group').removeClass('has-error');
-            },
-            submitHandler: function (form) {
-                form.submit();
-            }
-        });
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+        }else if($("#user-auth-table").length){
+            $(".select2").select2();
+        }
     });
 
     $('.table-remove').click(function (e) {
         e.preventDefault();
+        $(this).parents('tr').detach();
         sumTotalAmount();
     });
 
