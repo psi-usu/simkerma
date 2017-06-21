@@ -150,6 +150,7 @@ class MainController extends Controller {
             $this->user_info = [
                 'username' => Auth::user()->username,
                 'full_name' => $user->full_name,
+                'photo' => $user->photo,
 //                'email'     => $user->email,
             ];
         }

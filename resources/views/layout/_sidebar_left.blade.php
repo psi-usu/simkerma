@@ -4,7 +4,7 @@
     <div id="tour-8" class="sidebar-content">
         <div class="media">
             <a class="pull-left has-notif avatar" href="{{url('user/profile')}}">
-                <img src="../img/logo.png" alt="admin">
+                <img src="{{$user_info['photo']}}" alt="admin">
                 <i class="online"></i>
             </a>
             <div class="media-body">

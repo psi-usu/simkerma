@@ -80,14 +80,18 @@
                 <li id="tour-6" class="dropdown navbar-profile">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <span class="meta">
-                                    <span class="avatar"><img src="../img/logo.png" class="img-circle" alt="admin"></span>
+                                    <span class="avatar"><img src="{{$user_info['photo']}}" class="img-circle" alt="admin"></span>
                                     <span class="text hidden-xs hidden-sm text-muted" id="u_profile"></span>
                                     <span class="caret"></span>
                                 </span>
                     </a>
                     <!-- Start dropdown menu -->
                     <ul class="dropdown-menu animated flipInX">
-                        <li><a id="logout-button" href="#" data-logout="{{$logoutLink}}"><i class="fa fa-sign-out"></i>Logout</a></li>
+                        <li>
+                            <form action="{{$logoutLink}}">
+                                <button class="button-logout"><i class="fa fa-sign-out"></i>Logout</button>
+                            </form>
+                        </li>
                     </ul>
                     <!--/ End dropdown menu -->
                 </li><!-- /.dropdown navbar-profile -->

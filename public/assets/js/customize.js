@@ -615,10 +615,4 @@ $(document).ready(function () {
             });
         }
     });
-
-    $("#logout-button").click(function (e) {
-        e.preventDefault();
-        var logout = $(this).data('logout');
-        $.post(logout);
-    })
 });
