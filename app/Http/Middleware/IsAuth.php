@@ -18,7 +18,7 @@ class IsAuth {
      */
     public function handle($request, Closure $next)
     {
-        if(env('APP_ENV'))
+        if (env('APP_ENV'))
         {
             $user = new User();
             $user->username = env('LOGIN_USERNAME');
@@ -40,13 +40,14 @@ class IsAuth {
             }
         }
         );
-        if (! $login->logged_in)
+        if (! $login->logged_in && ! is_null($login->payload->identity))
         {
             $url = JWTAuth::makeLink([
-                'baseUrl' => 'https://akun.usu.ac.id/auth/login',
+                'baseUrl'  => 'https://akun.usu.ac.id/auth/login',
                 'callback' => url('/') . '/callback.php',
-                'redir' => url('/'),
+                'redir'    => url('/'),
             ]);
+
             return redirect()->away($url);
         } else
         {
