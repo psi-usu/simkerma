@@ -79,7 +79,7 @@
                     <!-- Start dropdown menu -->
                     <ul class="dropdown-menu animated flipInX">
                         {{--<li><a href="page-profile.html"><i class="fa fa-user"></i>View profile</a></li>--}}
-                        <li><a href="{{\parinpan\fanjwt\libs\JWTAuth::makeLink(['type' => 'logout','baseUrl' => 'https://akun.usu.ac.id/auth/logout','redir' => 'https://simsdm.usu.ac.id/'])}}"><i class="fa fa-sign-out"></i>Logout</a></li>
+                        <li><a href="{{\parinpan\fanjwt\libs\JWTAuth::makeLink(['type' => 'logout','baseUrl' => 'https://akun.usu.ac.id/auth/logout','redir' => env('APP_URL'),'callback' => url('/') . '/callback.php'])}}"><i class="fa fa-sign-out"></i>Logout</a></li>
                     </ul>
                     <!--/ End dropdown menu -->
                 </li><!-- /.dropdown navbar-profile -->
