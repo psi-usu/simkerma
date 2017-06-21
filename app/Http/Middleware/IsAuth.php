@@ -18,7 +18,7 @@ class IsAuth {
      */
     public function handle($request, Closure $next)
     {
-        if (env('APP_ENV') == 'LOCAL')
+        if (env('APP_ENV') == 'local')
         {
             $user = new User();
             $user->username = env('LOGIN_USERNAME');
