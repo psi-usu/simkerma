@@ -615,4 +615,35 @@ $(document).ready(function () {
             });
         }
     });
+
+    if ($(".search-employee").length) {
+        var autocomp_opt = {
+            source: function (request, response) {
+                $.ajax({
+                    url: baseUrl + '/users/ajax/search',
+                    dataType: "json",
+                    data: {
+                        query: request.term,
+                        limit: 10
+                    },
+                    success: function (data) {
+                        var transformed = $.map(data, function (el) {
+                            return {
+                                label: el.label,
+                                id: el.username,
+                                full_name: el.full_name
+                            };
+                        });
+                        response(transformed);
+                    }
+                });
+            },
+            select: function (event, ui) {
+                $("input[name=username]").val(ui.item.id);
+                $("input[name=full_name]").val(ui.item.full_name);
+                $('.search-employee').trigger('change');
+            }
+        };
+        $(".search-employee").autocomplete(autocomp_opt);
+    }
 });

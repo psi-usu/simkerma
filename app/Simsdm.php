@@ -89,4 +89,12 @@ class Simsdm {
 
         return $json;
     }
+
+    public function searchEmployee($input, $limit)
+    {
+        $response = $this->client->get('http://api.usu.ac.id/1.0/users/search?query=' . $input . '&limit=' . $limit);
+        $json = json_decode($response->getBody());
+
+        return $json;
+    }
 }

@@ -13,6 +13,16 @@
             $user_auth[$key] = old($key);
         }
     }
+    if(!empty($olds['auth_type']))
+    {
+        $user_auths = new \Illuminate\Support\Collection();
+        foreach ($olds['auth_type'] as $key => $item)
+        {
+            $user_auth['auth_type'] = $item;
+            $user_auth['unit'] = $olds['unit'][$key];
+            $user_auths->push($user_auth);
+        }
+    }
 
     if(!isset($user_auths))
     {
@@ -52,12 +62,16 @@
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <form action="{{url($action_url)}}" method="post" >
+                            <form action="{{url($action_url)}}" method="post">
                                 <div class="form-group {{$errors->has('username') ? 'has-error' : null}}">
-                                    <label for="username" class="control-label">Username (NIP / Nama sesuai SIMSDM)</label>
-                                    <input name="username" type="text" class="form-control" value="{{$user_auth['username']}}" required >
+                                    <label for="username" class="control-label">Username (NIP / Nama sesuai
+                                        SIMSDM)</label>
+                                    <input name="username_display" type="text" class="form-control search-employee"
+                                           value="{{$user_auth['username_display']}}" required {{$upd_mode == 'create' ? null : 'disabled'}}>
+                                    <input name="username" type="hidden" value="{{$user_auth['username']}}">
                                     @if($errors->has('username'))
-                                        <label id="bv_required-error" class="error" for="bv_required" style="display: inline-block;">
+                                        <label id="bv_required-error" class="error" for="bv_required"
+                                               style="display: inline-block;">
                                             {{$errors->first('username')}}
                                         </label>
                                     @endif
@@ -65,12 +79,14 @@
 
                                 <div class="form-group">
                                     <label for="full_name" class="control-label">Nama Lengkap</label>
-                                    <input name="full_name" type="text" class="form-control" value="" disabled >
+                                    <input name="full_name" type="text" class="form-control"
+                                           value="{{$user_auth['full_name']}}" readonly>
                                 </div>
 
                                 @if($upd_mode != "display")
                                     <div class="form-group">
-                                        <a href="#" class="btn btn-theme btn-md rounded table-add" title="Tambah"><i class="fa fa-plus"></i></a>
+                                        <a href="#" class="btn btn-theme btn-md rounded table-add" title="Tambah"><i
+                                                    class="fa fa-plus"></i></a>
                                     </div>
                                 @endif
 
@@ -82,42 +98,43 @@
                                         <th class="text-center">Hapus</th>
                                         </thead>
                                         <tbody>
-                                        {{--@foreach($user_auths as $item)--}}
+                                        @foreach($user_auths as $item)
                                             <tr class="text-center">
                                                 <td>
-                                                    <select name="auth_type[]" type="text" class="form-control select2" value="">
-                                                    {{--<select name="auth_type[]" type="text" class="form-control select2" value="{{$item['auth_type']}}">--}}
-                                                        <option value="AU">Admin Unit</option>
-                                                        <option value="AP">Admin Prodi</option>
+                                                    <select name="auth_type[]" type="text" class="form-control select2">
+                                                        <option value="AU" {{$item['auth_type'] == 'AU' ? 'selected' : null}}>Admin Unit</option>
+                                                        <option value="AP" {{$item['auth_type'] == 'AP' ? 'selected' : null}}>Admin Prodi</option>
                                                     </select>
                                                 </td>
                                                 <td>
-{{--                                                    <select name="unit[]" type="text" class="form-control select2" value="{{$item['unit']}}">--}}
-                                                    <select name="unit[]" type="text" class="form-control select2" value="">
+                                                    <select name="unit[]" type="text" class="form-control select2">
                                                         @foreach($units as $unit)
-                                                            <option value="{{$unit['code']}}">{{$unit['name']}}</option>
+                                                            <option value="{{$unit['code']}}" {{$item['unit'] == $unit['code'] ? 'selected' : null}}>{{$unit['name']}}</option>
                                                         @endforeach
                                                         @foreach($study_programs as $study_program)
-                                                                <option value="{{$study_program['name']}}">{{$study_program['name']}}</option>
+                                                            <option value="{{$study_program['name']}} {{$item['unit'] == $study_program['name'] ? 'selected' : null}}">{{$study_program['name']}}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
                                                 <td>
                                                     @if($upd_mode != "display")
-                                                        <a href="#" class="table-remove btn btn-danger rounded"><i class="fa fa-trash"></i></a>
+                                                        <a href="#" class="table-remove btn btn-danger rounded"><i
+                                                                    class="fa fa-trash"></i></a>
                                                     @endif
                                                 </td>
                                             </tr>
-                                        {{--@endforeach--}}
+                                        @endforeach
                                         <tr class="hide text-center">
                                             <td>
-                                                <select name="auth_type[]" type="text" class="form-control" value="">
+                                                <select name="auth_type[]" type="text" class="form-control" value=""
+                                                        disabled>
                                                     <option value="AU">Admin Unit</option>
                                                     <option value="AP">Admin Prodi</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <select name="unit[]" type="text" class="form-control" value="">
+                                                <select name="unit[]" type="text" class="form-control" value=""
+                                                        disabled>
                                                     @foreach($units as $unit)
                                                         <option value="{{$unit['code']}}">{{$unit['name']}}</option>
                                                     @endforeach
@@ -128,7 +145,8 @@
                                             </td>
                                             <td>
                                                 @if($upd_mode != "display")
-                                                    <a href="#" class="table-remove btn btn-danger rounded"><i class="fa fa-trash"></i></a>
+                                                    <a href="#" class="table-remove btn btn-danger rounded"><i
+                                                                class="fa fa-trash"></i></a>
                                                 @endif
                                             </td>
                                         </tr>
@@ -160,8 +178,8 @@
         <!--/ End body content -->
 
         <!-- Start footer content -->
-        @include('layout.footer')
-        <!--/ End footer content -->
+    @include('layout.footer')
+    <!--/ End footer content -->
 
     </section><!-- /#page-content -->
     <!--/ END PAGE CONTENT -->

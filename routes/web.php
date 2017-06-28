@@ -23,6 +23,7 @@ Route::get('users/edit', 'UserController@edit');
 Route::put('users/edit', 'UserController@update');
 Route::delete('users/delete', 'UserController@destroy');
 Route::get('users/ajax', 'UserController@getAjax');
+Route::get('users/ajax/search', 'UserController@searchUser');
 
 Route::get('/', 'CooperationController@index');
 Route::get('cooperations', 'CooperationController@index');
@@ -49,3 +50,6 @@ Route::get('partners/ajax', 'PartnerController@getAjax');
 
 Route::get('units', 'UnitController@index');
 Route::get('units/ajax', 'UnitController@getAjax');
+
+Route::get('api/1.0/cooperations/search', 'ApiController@searchCoop');
+Route::get('api/1.0/cooperations/{id}', 'ApiController@find');

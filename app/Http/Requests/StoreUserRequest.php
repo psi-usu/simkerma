@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Simsdm;
+use App\UserAuth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreUserRequest extends FormRequest {
     /**
@@ -23,22 +26,14 @@ class StoreUserRequest extends FormRequest {
     public function rules()
     {
         return [
-            'username'  => 'required|unique:users,username|max:100',
-            'password'  => 'required',
-            'full_name' => 'required|max:191',
-            'email'     => 'max:191',
-            'unit'      => 'required|max:30',
+            'username' => 'required',
         ];
     }
 
     public function messages()
     {
         return [
-            'username.required'  => 'Username harus diisi!',
-            'username.unique'    => 'Username sudah pernah digunakan!',
-            'password.required'  => 'Password harus diisi!',
-            'full_name.required' => 'Nama harus diisi!',
-            'unit.required'      => 'Unit harus diisi!',
+            'username.required' => 'Username harus diisi!',
         ];
     }
 
@@ -69,27 +64,50 @@ class StoreUserRequest extends FormRequest {
 
         if (! empty($this->input('unit')))
         {
-            $user = Auth::user();
-            if(isset($user->unit))
-            {
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'http://api.usu.ac.id/1.0/faculties/' . $user->unit . '/study_programs');
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-                $study_programs = json_decode(curl_exec($curl));
-                curl_close($curl);
+            $user_auths = UserAuth::where('username', Auth::user()->username)->get();
 
-                $unit_allowed = false;
-                foreach ($study_programs as $study_program)
+            // Is Super User, no need to check
+            $found = $user_auths->filter(function ($v, $k)
+            {
+                if ($v->auth_type == 'SU')
+                    return true;
+            });
+            if (! $found->isEmpty())
+                return $ret;
+
+            $allowed_sp = [];
+            foreach ($user_auths as $user_auth)
+            {
+                if ($user_auth->auth_type == 'AU')
                 {
-                    if($this->input('unit') == $study_program->name)
+                    $simsdm = new Simsdm();
+                    $study_programs = $simsdm->studyProgram($user_auth->unit);
+                    foreach ($study_programs as $study_program)
                     {
-                        $unit_allowed = true;
-                        break;
+                        $allowed_sp[] = $study_program['name'];
                     }
                 }
-                if(!$unit_allowed)
+            }
+            foreach ($this->input('auth_type') as $key => $item)
+            {
+                if ($item == 'AU')
                 {
-                    $ret[] = 'Anda tidak diperbolehkan untuk membuat user pada unit ini!';
+                    $found = $user_auths->filter(function ($v, $k) use ($key)
+                    {
+                        if ($v->auth_type == 'AU' && $v->unit == $this->input('unit')[$key])
+                            return true;
+                    });
+                    if ($found->isEmpty())
+                    {
+                        $ret[] = 'Anda tidak diperbolehkan untuk membuat user pada unit ' . $this->input('unit')[$key] . ' !';
+                    }
+                } else
+                {
+                    $k = array_search($this->input('unit')[$key], $allowed_sp);
+                    if (! $k)
+                    {
+                        $ret[] = 'Anda tidak diperbolehkan untuk membuat user pada unit ' . $this->input('unit')[$key] . ' !';
+                    }
                 }
             }
         }
