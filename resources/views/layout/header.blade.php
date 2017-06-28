@@ -88,7 +88,7 @@
                     <!-- Start dropdown menu -->
                     <ul class="dropdown-menu animated flipInX">
                         <li>
-                            <form action="{{$logoutLink}}">
+                            <form action="{{$logoutLink}}" method="post">
                                 <button class="button-logout"><i class="fa fa-sign-out"></i>Logout</button>
                             </form>
                         </li>
