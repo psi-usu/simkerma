@@ -1,55 +1,6 @@
 @extends('main_layout')
 
 @section('content')
-    <!-- Modal for View Kerma -->
-    <div id="view" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">Lihat Kerjasama</h4>
-                </div>
-                <div class="modal-body">
-                    <ul id="tree">
-                        <a href="jisd.html">hhg</a>
-                        <li>
-                            <a href="#">MoU</a>
-                            <ul>
-                                <li>
-                                    <a href="#">MoA</a>
-                                    <ul>
-                                        <a href="#"> <li>MoA</li> </a>
-                                        <a href="#"> <li>MoA</li> </a>
-                                        <a href="#"> <li>MoA</li> </a>
-                                    </ul>
-                                </li>
-                                <li>MoA</li>
-                                <li>MoA</li>
-                            </ul>
-                        </li>
-
-                        <li>
-                            <a href="#">MoU</a>
-                            <ul>
-                                <li>
-                                    <a href="#">MoA</a>
-                                    <ul>
-                                        <a href="#"> <li>MoA</li> </a>
-                                    </ul>
-                                </li>
-                                <li>MoA</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <!-- <button type="button" class="btn btn-theme">Save changes</button> -->
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-
     <!-- START @PAGE CONTENT -->
     <section id="page-content">
 

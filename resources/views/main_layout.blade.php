@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta name="description" content="Sistem Informasi Manajemen Kerja Sama | Universitas Sumatera Utara">
         <meta name="keywords" content="simkerma, sistem informasi manajamen kerja sama, usu, universitas sumatera utara">
-        <meta name="author" content="Djava UI">
+        <meta name="author" content="PSI USU">
         <title>SIMKERMA USU - {{$page_title}}</title>
         <!--/ END META SECTION -->
 
