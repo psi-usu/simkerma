@@ -75,7 +75,7 @@ class CooperationController extends MainController {
         $simsdm = new Simsdm();
         $partners = Partner::all();
         $coop_types = CoopType::all();
-        $mou_coops = Cooperation::where('coop_type', 'MOU')->get();
+        $mou_coops = Cooperation::where('coop_type', 'MOU')->with('partner')->get();
         $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
         $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();

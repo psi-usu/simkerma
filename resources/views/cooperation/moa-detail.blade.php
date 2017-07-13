@@ -14,6 +14,7 @@
 @endphp
 
 <!-- MOA -->
+{{-- {{print_r($mou_coops)}} --}}
 <div id="MoA" style='display: none !important;'>
     <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
         <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
@@ -22,7 +23,7 @@
             @foreach($mou_coops as $mou_coop)
                 <option value="{{$mou_coop['id']}}"
                         {{$mou_coop['id'] == $coop_id ? "selected" : null}}>
-                    {{$mou_coop['area_of_coop']}}
+                    {{$mou_coop->partner['name']}} - {{$mou_coop['area_of_coop']}}
                 </option>
             @endforeach
         </select>
@@ -266,7 +267,7 @@
     <div class="form-group {{$errors->has('file_name_ori') ? 'has-error' : null}}">
         <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>
         @if($disabled == null)
-            <input name="file_name_ori" id="fileinput-moa-doc" type="file" class="file">
+            <input name="file_name_ori" id="fileinput-moa-doc" type="file" class="file" accept=".pdf">
             @if($errors->has('file_name_ori'))
                 <label class="error" style="display: inline-block;">
                     {{$errors->first('file_name_ori')}}

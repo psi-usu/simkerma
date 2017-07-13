@@ -155,7 +155,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-
+                                
                                 @include('cooperation.mou-detail')
 
                                 @include('cooperation.moa-detail')

@@ -94,7 +94,7 @@
     <div class="form-group">
         <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>
         @if($disabled == null)
-            <input name="file_name_ori" id="fileinput-mou-doc" type="file" class="file" required>
+            <input name="file_name_ori" id="fileinput-mou-doc" type="file" class="file" accept=".pdf" required>
             @if($errors->has('file_name_ori'))
                 <label class="error" style="display: inline-block;">
                     {{$errors->first('file_name_ori')}}
