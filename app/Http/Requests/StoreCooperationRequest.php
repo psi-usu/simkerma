@@ -152,6 +152,16 @@ class StoreCooperationRequest extends FormRequest {
             }
         }
 
+        $coop_partner = Cooperation::where('partner_id', $this->input('partner_id'))->get();
+
+        // dd($coop_partner);
+        if (!$coop_partner->isEmpty())
+        {
+            $ret[] = 'Kerjasama dengan partner ini sudah ada!';
+
+            return $ret;
+        }
+
         if ($this->input('coop_type') == 'MOA')
         {
             $UserAuth = new UserAuth();
