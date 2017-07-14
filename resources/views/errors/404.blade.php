@@ -11,7 +11,7 @@
     <!-- START @META  SECTION -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Halaman Tidak Ditemukan | SIPUSTAHA - Error 404</title>
+    <title>Halaman Tidak Ditemukan | SIMKERMA - Error 404</title>
     <!--/ END META SECTION -->
 
     <!-- START @FONT  STYLES -->
