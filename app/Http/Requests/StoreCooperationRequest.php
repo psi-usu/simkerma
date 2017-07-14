@@ -74,7 +74,7 @@ class StoreCooperationRequest extends FormRequest {
         if ($this->input('id') == null)
         {
             $rules = array_add($rules, 'coop_type', 'required|max:10');
-            $rules = array_add($rules, 'file_name_ori', 'required');
+            $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
         }
 
         return $rules;
