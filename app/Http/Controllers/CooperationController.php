@@ -8,6 +8,7 @@ use App\CoopType;
 use App\Http\Requests\StoreCooperationRequest;
 use App\Partner;
 use App\Simsdm;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class CooperationController extends MainController {
 
     public function __construct()
     {
-        $this->middleware('is_auth');
+        $this->middleware('is_auth')->except('index');
 
         parent::__construct();
 
@@ -45,7 +46,50 @@ class CooperationController extends MainController {
 
     public function index()
     {
-        $page_title = 'Kerjasama';
+        if (env('APP_ENV') == 'local')
+        {
+            $login = new \stdClass();
+            $login->logged_in = true;
+            $login->payload = new \stdClass();
+            $login->payload->identity = env('LOGIN_USERNAME');
+        } else
+        {
+            $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
+            {
+                $loggedIn = $credential->logged_in;
+                if ($loggedIn)
+                {
+                    return $credential;
+                } else
+                {
+                    setcookie('ssotok', null, -1, '/');
+
+                    return false;
+                }
+            }
+            );
+        }
+        if (! $login->logged_in)
+        {
+            $login_link = JWTAuth::makeLink([
+                'baseUrl'  => 'https://akun.usu.ac.id/auth/login',
+                'callback' => url('/') . '/callback.php',
+                'redir'    => url('/'),
+            ]);
+
+            return view('landing-page', compact('login_link'));
+        } else
+        {
+            $user = new User();
+            $user->username = $login->payload->identity;
+            Auth::login($user);
+
+            $this->setUserInfo();
+
+            $page_title = 'Kerjasama';
+
+            return view('cooperation.coop-list', compact('page_title'));
+        }
 
         return view('cooperation.coop-list', compact('page_title'));
     }
@@ -610,6 +654,7 @@ class CooperationController extends MainController {
             $ret[$i]['coop_type'] = $item->coop_type;
             $i++;
         }
+
         return $ret;
     }
 }
