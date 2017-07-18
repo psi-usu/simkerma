@@ -74,7 +74,7 @@ class StoreCooperationRequest extends FormRequest {
         if ($this->input('id') == null)
         {
             $rules = array_add($rules, 'coop_type', 'required|max:10');
-            $rules = array_add($rules, 'file_name_ori', 'required');
+            $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
         }
 
         return $rules;
@@ -150,6 +150,16 @@ class StoreCooperationRequest extends FormRequest {
 
                 return $ret;
             }
+        }
+
+        $coop_partner = Cooperation::where('partner_id', $this->input('partner_id'))->get();
+
+        // dd($coop_partner);
+        if (!$coop_partner->isEmpty())
+        {
+            $ret[] = 'Kerjasama dengan partner ini sudah ada!';
+
+            return $ret;
         }
 
         if ($this->input('coop_type') == 'MOA')

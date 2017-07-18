@@ -117,7 +117,8 @@ class CooperationController extends MainController {
         $action_url = 'cooperations/create';
 
         $simsdm = new Simsdm();
-        $partners = Partner::all();
+        $partner_id_Coop = Cooperation::pluck('partner_id')->all();
+        $partners = Partner::whereNotIn('id', $partner_id_Coop)->get();
         $coop_types = CoopType::all();
         $mou_coops = Cooperation::where('coop_type', 'MOU')->with('partner')->get();
         $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
