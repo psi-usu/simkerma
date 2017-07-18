@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Input;
+use parinpan\fanjwt\libs\JWTAuth;
 use View;
 
 class CooperationController extends MainController {
