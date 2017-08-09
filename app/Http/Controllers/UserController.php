@@ -143,6 +143,7 @@ class UserController extends MainController {
             $user_auth->created_by = Auth::user()->username;
             $user_auths->push($user_auth);
         }
+        
         $user_auths = $user_auths->unique(function ($item)
         {
             return $item['auth_type'] . $item['unit'];
