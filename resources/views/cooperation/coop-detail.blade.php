@@ -84,7 +84,7 @@
                         </div><!-- /.panel-heading -->
                         <div class="panel-body">
                             @if($upd_mode == 'display')
-                                <div class="form-group">
+                                <div class="form-group" style="display:none;">
                                     <a href="{{url('cooperations/edit?id=' . $cooperation->id)}}"
                                        class="btn btn-success rounded">Ubah</a>
                                     <a href="{{url('/')}}" class="btn btn-danger rounded">Batal</a>
