@@ -18,33 +18,37 @@ class ApiController extends MainController
     public function searchCoop()
     {
         $query = Input::get('query');
-        $limit = Input::get('limit');
-        $cooperations = Cooperation::all([
-            'id',
-            'partner_id',
-            'coop_type',
-            'area_of_coop',
-            'sign_date',
-            'end_date',
-            'form_of_coop',
-            'usu_doc_no',
-            'partner_doc_no',
-            'implementation',
-            'unit',
-            'contract_amount',
-        ]);
-        if(!is_null($limit))
-        {
-            $cooperations = $cooperations->take($limit);
-        }
+//        $limit = Input::get('limit');
+        $cooperations  = Cooperation::
+                        select(
+                            'id',
+                            'partner_id',
+                            'cooperation_id',
+                            'coop_type',
+                            'area_of_coop',
+                            'sign_date',
+                            'end_date',
+                            'form_of_coop',
+                            'usu_doc_no',
+                            'partner_doc_no',
+                            'implementation',
+                            'unit',
+                            'contract_amount'
+                        )
+                        ->where('area_of_coop','like','%' .$query. '%')->limit(5)->get();
+
+//        if(!is_null($limit))
+//        {
+//            $cooperations = $cooperations->take($limit);
+//        }
         $results = [];
 
         $coop_items = new Collection();
         $i = 0;
         foreach ($cooperations as $cooperation)
         {
-            $results[$i] = $cooperation;
-            $results[$i]['item'] = $cooperation->coopItem()->get([
+            $results['data'][$i] = $cooperation;
+            $results['data'][$i]['item'] = $cooperation->coopItem()->get([
                 'item_name',
                 'item_quantity',
                 'item_uom',
@@ -53,6 +57,13 @@ class ApiController extends MainController
             ]);
             $i++;
         }
+
+        $count_data = count($results);
+        if ($count_data == 0)
+        {
+            $results['data'] = [];
+        }
+        $results['iTotalRecords'] = $results['iTotalDisplayRecords'] = $count_data;
 
         $results = json_encode($results, JSON_PRETTY_PRINT);
 
