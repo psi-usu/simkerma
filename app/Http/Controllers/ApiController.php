@@ -11,7 +11,7 @@ class ApiController extends MainController
 {
     public function __construct()
     {
-        $this->middleware('is_auth');
+//        $this->middleware('is_auth');
         parent::__construct();
     }
 

@@ -3,8 +3,11 @@
 @php
     if(!isset($cooperation))
         $cooperation = new \App\Cooperation();
-    if( is_null($cooperation['coop_type']))
+    if($auths=='SU'){
         $cooperation['coop_type'] = 'MOU';
+    }else{
+        $cooperation['coop_type'] = 'MOA';
+    }
 
     $olds = session()->getOldInput();
     foreach ($olds as $key => $old)
@@ -103,6 +106,7 @@
                                     <div class='rdio radio-inline rdio-theme rounded'>
                                         <input type='radio' class='radio-inline' id='radio-type-rounded1'
                                                required value='MOU' name="coop_type"
+                                                {{$auths!='SU' ? 'disabled' : null}}
                                                 {{$cooperation['coop_type'] == 'MOU' ? 'checked' : null}}
                                                 {{$upd_mode != 'create' ? 'disabled' : null}}
                                         >

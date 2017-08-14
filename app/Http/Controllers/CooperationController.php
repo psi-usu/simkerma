@@ -9,6 +9,7 @@ use App\Http\Requests\StoreCooperationRequest;
 use App\Partner;
 use App\Simsdm;
 use App\User;
+use App\UserAuth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -118,7 +119,7 @@ class CooperationController extends MainController {
         $action_url = 'cooperations/create';
 
         $simsdm = new Simsdm();
-        $partner_id_Coop = Cooperation::pluck('partner_id')->all();
+        $partner_id_Coop = Cooperation::select('partner_id')->where('coop_type','MOU')->get();
         $partners = Partner::whereNotIn('id', $partner_id_Coop)->get();
         $coop_types = CoopType::all();
         $mou_coops = Cooperation::where('coop_type', 'MOU')->with('partner')->get();
@@ -128,6 +129,9 @@ class CooperationController extends MainController {
         $coop_items = new Collection();
         $coop_item = new CoopItem();
         $coop_items->add($coop_item);
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
+        $auths = $user_auth->auth_type;
 
         return view('cooperation.coop-detail', compact(
             'page_title',
@@ -139,7 +143,8 @@ class CooperationController extends MainController {
             'moa_coops',
             'faculties',
             'units',
-            'coop_items'
+            'coop_items',
+            'auths'
         ));
     }
 
@@ -287,6 +292,9 @@ class CooperationController extends MainController {
         }
         $coop_tree_relations = $this->getCoopRelation($input['id']);
 
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
+        $auths = $user_auth->auth_type;
+
         return view('cooperation.coop-detail', compact(
             'page_title',
             'upd_mode',
@@ -301,7 +309,8 @@ class CooperationController extends MainController {
             'prev_coop',
             'coop_items',
             'coop_tree_relations',
-            'disabled'
+            'disabled',
+            'auths'
         ));
     }
 
