@@ -130,8 +130,11 @@ class CooperationController extends MainController {
         $coop_item = new CoopItem();
         $coop_items->add($coop_item);
 
+        $auths = null;
         $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
-        $auths = $user_auth->auth_type;
+        if($user_auth){
+            $auths = $user_auth->auth_type;
+        }
 
         return view('cooperation.coop-detail', compact(
             'page_title',
@@ -292,8 +295,11 @@ class CooperationController extends MainController {
         }
         $coop_tree_relations = $this->getCoopRelation($input['id']);
 
+        $auths = null;
         $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
-        $auths = $user_auth->auth_type;
+        if($user_auth){
+            $auths = $user_auth->auth_type;
+        }
 
         return view('cooperation.coop-detail', compact(
             'page_title',
