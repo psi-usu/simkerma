@@ -287,7 +287,8 @@ $(document).ready(function () {
                 id: id
             },
             success: function (data) {
-                $("select[name=partner_id]").val(data['partner_id']).change();
+                // $("select[name=partner_id]").val(data['partner_id']).change();
+                $('select[name=partner_id]').prepend('<option value='+data["partner_id"]+' selected="selected">'+data["partner_name"]+'</option>').change();
                 $("select[name=partner_id]").trigger("chosen:updated");
                 $("select[name=form_of_coop]").val(data['form_of_coop']).change();
                 $("select[name=form_of_coop]").trigger("chosen:updated");

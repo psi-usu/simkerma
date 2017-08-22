@@ -53,7 +53,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-            $login->payload->identity = env('LOGIN_USERNAME');
+//            $login->payload->identity = env('LOGIN_USERNAME');
+            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -119,21 +120,67 @@ class CooperationController extends MainController {
         $action_url = 'cooperations/create';
 
         $simsdm = new Simsdm();
-        $partner_id_Coop = Cooperation::select('partner_id')->where('coop_type','MOU')->get();
+        $partner_id_Coop = Cooperation::select('partner_id')->where('coop_type','MOU')->where('deleted_at',null)->get();
         $partners = Partner::whereNotIn('id', $partner_id_Coop)->get();
         $coop_types = CoopType::all();
         $mou_coops = Cooperation::where('coop_type', 'MOU')->with('partner')->get();
-        $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
-        $faculties = $simsdm->facultyAll();
-        $units = $simsdm->unitAll();
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        $moa_coops = new Collection();
+        foreach ($user_auth as $user){
+            $moa_coop = Cooperation::where('coop_type', 'MOA')->where('unit',$user->unit)->get();
+
+            if($moa_coop){
+                $merged = $moa_coops->merge($moa_coop);
+                $moa_coops = $merged;
+            }
+            $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->unit)->get();
+            if($moa_coop_sub){
+                $moa_coops->merge($moa_coop_sub);
+            }
+        }
+
         $coop_items = new Collection();
         $coop_item = new CoopItem();
         $coop_items->add($coop_item);
 
-        $auths = null;
-        $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
-        if($user_auth){
-            $auths = $user_auth->auth_type;
+        $isSuper = null;
+        $isProdi = null;
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type)','SAU')){
+            $isSuper=true;
+        }
+
+        $faculties = [];
+        $units = [];
+
+        if($isSuper){
+            $faculties = $simsdm->facultyAll();
+            $units = $simsdm->unitAll();
+        }elseif($user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+            foreach ($user_auth as $user){
+                $l_faculties = $simsdm->facultyAll();
+                $l_units = $simsdm->unitAll();
+
+                foreach ($l_faculties as $key=>$faculty){
+                    if (is_array($l_faculties) && !in_array($user->unit, $faculty)){
+                        unset($l_faculties[$key]);
+                    }
+                }
+                $faculties = array_merge($faculties, $l_faculties);
+                foreach ($l_units as $key=>$unit){
+                    if (is_array($l_units) && !in_array($user->unit, $unit)){
+                        unset($l_units[$key]);
+                    }
+                }
+                $units = array_merge($units, $l_units);
+            }
+        } elseif (!$user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+            $isProdi = true;
+            $prodi = UserAuth::select('unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
         return view('cooperation.coop-detail', compact(
@@ -147,14 +194,15 @@ class CooperationController extends MainController {
             'faculties',
             'units',
             'coop_items',
-            'auths'
+            'isSuper',
+            'isProdi',
+            'prodi'
         ));
     }
 
     public function store(StoreCooperationRequest $request)
     {
         $this->authorize('create', Cooperation::class);
-
         $input = Input::all();
 
         DB::transaction(function () use ($input, $request)
@@ -295,10 +343,15 @@ class CooperationController extends MainController {
         }
         $coop_tree_relations = $this->getCoopRelation($input['id']);
 
-        $auths = null;
-        $user_auth = UserAuth::where('username',$this->user_info['username'])->first();
-        if($user_auth){
-            $auths = $user_auth->auth_type;
+        $isSuper = null;
+        $isProdi = null;
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $isSuper=true;
+        }
+        if (!$user_auth->contains('auth_type','AU') || $user_auth->contains('auth_type','AP')){
+            $isProdi = true;
+            $prodi = UserAuth::select('unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
         return view('cooperation.coop-detail', compact(
@@ -316,7 +369,8 @@ class CooperationController extends MainController {
             'coop_items',
             'coop_tree_relations',
             'disabled',
-            'auths'
+            'isSuper',
+            'isProdi'
         ));
     }
 
@@ -368,10 +422,37 @@ class CooperationController extends MainController {
 
     public function getAjax()
     {
-        $cooperations = Cooperation::all();
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        $cooperations = new Collection();
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $cooperations = Cooperation::all();
+        }
+        if ($user_auth->contains('auth_type','AU')){
+            foreach ($user_auth as $user_a){
+                $coop = Cooperation::where('unit',$user_a->unit)->get();
+                $cooperations = $cooperations->merge($coop);
+            }
+            $cooperations_mou = Cooperation::where('coop_type','MOU')->get();
+            $cooperations = $cooperations->merge($cooperations_mou);
+
+            if($user_auth->contains('auth_type','AP')){
+                foreach ($user_auth as $user_a){
+                    $coop = Cooperation::where('sub_unit',$user_a->unit)->get();
+                    $cooperations = $cooperations->merge($coop);
+                }
+            }
+        }
+        if (!$user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+            foreach ($user_auth as $user_a){
+                $coop = Cooperation::where('sub_unit',$user_a->unit)->get();
+                $cooperations = $cooperations->merge($coop);
+            }
+            $cooperations_mou = Cooperation::where('coop_type','MOU')->get();
+            $cooperations = $cooperations->merge($cooperations_mou);
+        }
 
         $data = [];
-
         $i = 0;
         foreach ($cooperations as $cooperation)
         {

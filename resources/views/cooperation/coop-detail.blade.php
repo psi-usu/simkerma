@@ -3,10 +3,12 @@
 @php
     if(!isset($cooperation))
         $cooperation = new \App\Cooperation();
-    if($auths=='SU'){
-        $cooperation['coop_type'] = 'MOU';
-    }else{
-        $cooperation['coop_type'] = 'MOA';
+    if($upd_mode == 'create'){
+        if($isSuper){
+            $cooperation['coop_type'] = 'MOU';
+        }else{
+            $cooperation['coop_type'] = 'MOA';
+        }
     }
 
     $olds = session()->getOldInput();
@@ -106,7 +108,7 @@
                                     <div class='rdio radio-inline rdio-theme rounded'>
                                         <input type='radio' class='radio-inline' id='radio-type-rounded1'
                                                required value='MOU' name="coop_type"
-                                                {{$auths!='SU' ? 'disabled' : null}}
+                                                {{!$isSuper ? 'disabled' : null}}
                                                 {{$cooperation['coop_type'] == 'MOU' ? 'checked' : null}}
                                                 {{$upd_mode != 'create' ? 'disabled' : null}}
                                         >
@@ -135,7 +137,9 @@
                                     <label for="name" class="control-label">Pilih Jenis Addendum</label>
                                     <select class="form-control mb-15" name='addendum_type' id="pilihan" required>
                                         <option value="" disabled selected>-- Pilih --</option>
-                                        <option value="MOU" {{$prev_coop['coop_type'] == "MOU" ? "selected" : null}}>MoU / Nota Kesepahaman</option>
+                                        @if($isSuper)
+                                            <option value="MOU" {{$prev_coop['coop_type'] == "MOU" ? "selected" : null}}>MoU / Nota Kesepahaman</option>
+                                        @endif
                                         <option value="MOA" {{$prev_coop['coop_type'] == "MOA" ? "selected" : null}}>MoA / Perjanjian Kerja Sama</option>
                                     </select>
                                 </div>

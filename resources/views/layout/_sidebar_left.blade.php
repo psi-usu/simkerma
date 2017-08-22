@@ -40,7 +40,9 @@
                 {!! Request::is('partners', 'partners/*', 'units') ? '<span class="selected"></span>' : null !!}
             </a>
             <ul>
-                <li><a href="{{url('partners')}}">Instansi Partner</a></li>
+                @can('admin-menu')
+                    <li><a href="{{url('partners')}}">Instansi Partner</a></li>
+                @endcan
                 <li><a href="{{url('units')}}">Unit Kerja</a></li>
             </ul>
         </li>

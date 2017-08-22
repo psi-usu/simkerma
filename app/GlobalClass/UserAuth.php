@@ -9,6 +9,11 @@ class UserAuth {
         return $user->userAuth()->where('auth_type', 'SU')->exists();
     }
 
+    public function isSuperAdminUnit(User $user)
+    {
+        return $user->userAuth()->where('auth_type', 'SAU')->exists();
+    }
+
     public function isAdminUnit(User $user)
     {
         return $user->userAuth()->where('auth_type', 'AU')->exists();

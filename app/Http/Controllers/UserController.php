@@ -121,13 +121,29 @@ class UserController extends MainController {
             }
         }
 
+        $isSuper = null;
+        $authenticat = null;
+        $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        if($user_authentication->contains('auth_type','SU')){
+            $isSuper=true;
+            $authenticat = 'SU';
+        }elseif($user_authentication->contains('auth_type','SAU')){
+            $authenticat = 'SAU';
+        } elseif($user_authentication->contains('auth_type','AU')){
+            $authenticat = 'AU';
+        }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
+            return abort('404');
+        }
+
         return view('user.user-detail', compact(
             'page_title',
             'auths',
             'upd_mode',
             'action_url',
             'units',
-            'study_programs'
+            'study_programs',
+            'isSuper',
+            '$authenticat'
         ));
     }
 
@@ -195,10 +211,26 @@ class UserController extends MainController {
                 }
             }
         }
+        $isSuper = null;
+        $authenticat = null;
+        $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        if($user_authentication->contains('auth_type','SU')){
+            $isSuper=true;
+            $authenticat = 'SU';
+        }elseif($user_authentication->contains('auth_type','SAU')){
+            $authenticat = 'SAU';
+        } elseif($user_authentication->contains('auth_type','AU')){
+            $authenticat = 'AU';
+        }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
+            return abort('404');
+        }
+
         $user_auth = UserAuth::where('username', $input)->first();
         $user_auth->username_display = $user_auth->username;
         $employee = $simsdm->getEmployee($user_auth->username);
         $user_auth->full_name = $employee->full_name;
+
+
 
         return view('user.user-detail', compact(
             'page_title',
@@ -208,7 +240,9 @@ class UserController extends MainController {
             'units',
             'study_programs',
             'user_auths',
-            'user_auth'
+            'user_auth',
+            'isSuper',
+            'authenticat'
         ));
     }
 

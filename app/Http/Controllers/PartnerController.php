@@ -57,7 +57,7 @@ class PartnerController extends MainController {
 
     public function store(StorePartnerRequest $request)
     {
-        $this->authorize('create', Partner::class);
+//        $this->authorize('create', Partner::class);
 
         $input = Input::all();
 

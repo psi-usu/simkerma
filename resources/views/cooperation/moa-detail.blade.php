@@ -1,4 +1,6 @@
 @php
+    if(!isset($prodi))
+        $prodi = new \Illuminate\Support\Collection();
     if(!isset($mou_coops))
         $mou_coops = new App\Cooperation();
     if(!isset($faculties))
@@ -113,7 +115,7 @@
             </label>
         @endif
     </div>
-    <div class="form-group {{$errors->has('unit') ? 'has-error' : null}}">
+    <div class="form-group {{$errors->has('unit') ? 'has-error' : null}} " @if($isProdi!=null) {{'style=display:none'}} @endif>
         <label for="unit" class="control-label">Unit yang melakukan kerjasama</label>
         <div>
             <select name='unit' class="form-control select2 mb-15">
@@ -139,11 +141,11 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" @if($isProdi!=null) {{'style=display:none'}} @endif >
         <label for="is_sub_unit">Kerjasama dengan sub unit / program studi </label>
         <div class='ckbox ckbox-theme'>
             <input type='checkbox' id='checkbox-default1'
-                   required value='1' name="is_sub_unit"
+                    value='1' name="is_sub_unit"
                     {{$cooperation['sub_unit'] != null ? 'checked' : null}}
                     {{$upd_mode != 'create' ? 'disabled' : null}}
             >
@@ -155,7 +157,13 @@
         <label for="sub_unit" class="control-label">Sub Unit</label>
         <div>
             <select name='sub_unit' class="form-control select2 mb-15">
-                <option value="" disabled selected>-- Pilih Sub Unit --</option>
+                {{--<option value="" disabled selected>-- Pilih Sub Unit --</option>--}}
+                @foreach($prodi as $p)
+                    <option value="{{$p->unit}}"
+                            {{$cooperation['sub_unit'] == $p->unit ? 'selected' : null}}>
+                        {{$p->unit}}
+                    </option>
+                @endforeach
                 @if($upd_mode == 'display')
                     <option value="{{$cooperation['sub_unit']}}" selected>{{$cooperation['sub_unit']}}</option>
                 @endif

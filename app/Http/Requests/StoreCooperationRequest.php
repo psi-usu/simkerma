@@ -49,7 +49,7 @@ class StoreCooperationRequest extends FormRequest {
             if ($cooperation->coop_type == 'MOA')
             {
                 $rules = array_add($rules, 'implementation', 'required');
-                $rules = array_add($rules, 'unit', 'required|max:30');
+//                $rules = array_add($rules, 'unit', 'required|max:30');
             }
 
             if ($this->input('coop_type') == 'MOU')
@@ -62,7 +62,7 @@ class StoreCooperationRequest extends FormRequest {
         if ($this->input('coop_type') == 'MOA')
         {
             $rules = array_add($rules, 'implementation', 'required');
-            $rules = array_add($rules, 'unit', 'required|max:30');
+//            $rules = array_add($rules, 'unit', 'required|max:30');
         }
 
         if ($this->input('coop_type') == 'MOU')
@@ -152,14 +152,23 @@ class StoreCooperationRequest extends FormRequest {
             }
         }
 
-        $coop_partner = Cooperation::where('partner_id', $this->input('partner_id'))->get();
+        if($this->input('coop_type')== 'MOU'){
+            $coop_partner = Cooperation::where('partner_id', $this->input('partner_id'))->where('deleted_at',null)->get();
 
-        // dd($coop_partner);
-        if (!$coop_partner->isEmpty())
-        {
-            $ret[] = 'Kerjasama dengan partner ini sudah ada!';
+            if (!$coop_partner->isEmpty())
+            {
+                $ret[] = 'Kerjasama dengan partner ini sudah ada!';
 
-            return $ret;
+                return $ret;
+            }
+
+            $UserAuth = new UserAuth();
+            $user = Auth::user();
+            if (!$UserAuth->isSuperUser($user) && !$UserAuth->isSuperAdminUnit($user)){
+                $ret[] = 'Anda tidak mempunyai hak akses untuk membuat kerjasama MOU ini';
+
+                return $ret;
+            }
         }
 
         if ($this->input('coop_type') == 'MOA')
@@ -187,7 +196,7 @@ class StoreCooperationRequest extends FormRequest {
             {
                 if (! is_null($this->input('item_name')[$key]) ||
                     ! is_null($this->input('item_quantity')[$key]) ||
-                    ! is_null($this->input('item_uom')[$key]) ||
+                    ! is_null($this->input('item_uom')[y]) ||
                     ! is_null($this->input('item_total_amount')[$key]) ||
                     ! is_null($this->input('item_annotation')[$key])
                 )

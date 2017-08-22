@@ -6,13 +6,14 @@
             $disabled = 'disabled';
         }
     }
+
 @endphp
 
 <!-- MOU -->
 <div id="MoU" style='display: none !important;'>
     <div class="form-group {{$errors->has('partner_id') ? 'has-error' : null}}">
         <label for="name" class="control-label">Instansi Partner</label>
-        <select class="form-control mb-15 select2" name='partner_id' {{$disabled}} required>
+        <select class="form-control mb-15 select2" name='partner_id' {{$disabled}} data-placeholder="-- Pilih Instansi Partner --"  required>
             <option value="" disabled selected>-- Pilih Instansi Partner --</option>
             @foreach($partners as $partner)
                 <option value="{{$partner->id}}" {{$cooperation['partner_id'] == $partner->id ? 'selected' : null}}>{{$partner->name}}</option>
