@@ -102,7 +102,10 @@
                                             <tr class="text-center">
                                                 <td>
                                                     <select name="auth_type[]" type="text" class="form-control select2">
-                                                        @if($authenticat=='SAU' || $authenticat=='SU')
+                                                        @if($authentication=='SU')
+                                                            <option value="SAU">Super User Admin Unit</option>
+                                                        @endif
+                                                        @if($authentication=='SAU' || $authentication=='SU')
                                                             <option value="AU" {{$item['auth_type'] == 'AU' ? 'selected' : null}}>Admin Unit</option>
                                                         @endif
                                                         <option value="AP" {{$item['auth_type'] == 'AP' ? 'selected' : null}}>Admin Prodi</option>
@@ -110,13 +113,16 @@
                                                 </td>
                                                 <td>
                                                     <select name="unit[]" type="text" class="form-control select2">
-                                                        @if($authenticat=='SAU' || $authenticat=='SU')
-                                                            @foreach($units as $unit)
-                                                                <option value="{{$unit['code']}}" {{$item['unit'] == $unit['code'] ? 'selected' : null}}>{{$unit['name']}}</option>
-                                                            @endforeach
+                                                        @if($authentication=='SAU' || $authentication=='SU')
+                                                            @if($item['unit']!=NULL)
+                                                                @foreach($units as $unit)
+                                                                    <option value="{{$unit['code']}}" {{$item['unit'] == $unit['code'] ? 'selected' : null}}>{{$unit['name']}}</option>
+                                                                @endforeach
+                                                            @endif
                                                         @endif
+
                                                         @foreach($study_programs as $study_program)
-                                                            <option value="{{$study_program['name']}} {{$item['unit'] == $study_program['name'] ? 'selected' : null}}">{{$study_program['name']}}</option>
+                                                            <option value="{{$study_program['name']}}" {{$item['sub_unit'] == $study_program['name'] ? 'selected' : null}}>{{$study_program['name']}}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
@@ -130,21 +136,25 @@
                                         @endforeach
                                         <tr class="hide text-center">
                                             <td>
-                                                <select name="auth_type[]" type="text" class="form-control" value=""
+                                                <select name="auth_type[]" type="text" class="form-control auth_type_user" value=""
                                                         disabled>
                                                     @if($isSuper)
                                                         <option value="SAU">Super User Admin Unit</option>
                                                     @endif
-                                                    <option value="AU">Admin Unit</option>
+                                                    @if($authentication=='SU' || $authentication=='SAU')
+                                                        <option value="AU">Admin Unit</option>
+                                                    @endif
                                                     <option value="AP">Admin Prodi</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <select name="unit[]" type="text" class="form-control" value=""
+                                                <select name="unit[]" type="text" class="form-control units" value=""
                                                         disabled>
-                                                    @foreach($units as $unit)
-                                                        <option value="{{$unit['code']}}">{{$unit['name']}}</option>
-                                                    @endforeach
+                                                    @if($authentication=='SU' || $authentication=='SAU')
+                                                        @foreach($units as $unit)
+                                                            <option value="{{$unit['code']}}">{{$unit['name']}}</option>
+                                                        @endforeach
+                                                    @endif
                                                     @foreach($study_programs as $study_program)
                                                         <option value="{{$study_program['name']}}">{{$study_program['name']}}</option>
                                                     @endforeach

@@ -159,9 +159,9 @@
             <select name='sub_unit' class="form-control select2 mb-15">
                 {{--<option value="" disabled selected>-- Pilih Sub Unit --</option>--}}
                 @foreach($prodi as $p)
-                    <option value="{{$p->unit}}"
-                            {{$cooperation['sub_unit'] == $p->unit ? 'selected' : null}}>
-                        {{$p->unit}}
+                    <option value="{{$p->sub_unit}}"
+                            {{$cooperation['sub_unit'] == $p->sub_unit ? 'selected' : null}}>
+                        {{$p->sub_unit}}
                     </option>
                 @endforeach
                 @if($upd_mode == 'display')

@@ -647,4 +647,15 @@ $(document).ready(function () {
         };
         $(".search-employee").autocomplete(autocomp_opt);
     }
+
+    // $(".auth_type_user").change(function () {
+    //     alert($(this).val());
+    //     if ($(this).val() == 'AU') {
+    //         $('#unit').fadeIn();
+    //         $('#sub_unit').fadeOut();
+    //     }else{
+    //         $('#unit').fadeOut();
+    //         $('#sub_unit').fadeIn();
+    //     }
+    // });
 });

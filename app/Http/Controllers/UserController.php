@@ -6,13 +6,12 @@ use App\Http\Requests\SendForgotEmailRequest;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UserLoginRequest;
 use App\Simsdm;
-use App\User;
 use App\UserAuth;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
+use Psy\Input\ShellInput;
 use View;
 
 class UserController extends MainController {
@@ -48,12 +47,27 @@ class UserController extends MainController {
     {
         $page_title = 'User';
 
+        $auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        if($auth->contains('unit',NULL) && $auth->contains('auth_type','AP')){
+            return abort('403');
+        }
+
         return view('user.user-list', compact('page_title'));
     }
 
     public function getAjax()
     {
-        $user_auths = UserAuth::all();
+        $auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        $user_auths = null;
+
+        if($auth->contains('auth_type','SU')){
+            $user_auths = UserAuth::all();
+        }elseif ($auth->contains('auth_type','SAU')){
+            $user_auths = UserAuth::where('auth_type','!=','SU')->get();
+        }else{
+            $user_auths = UserAuth::where('auth_type','!=','SU')->where('created_by',$auth[0]->username)->get();
+        }
+
         $users = $user_auths->unique('username');
         $simsdm = new Simsdm();
 
@@ -102,12 +116,7 @@ class UserController extends MainController {
         $simsdm = new Simsdm();
         $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
-        foreach ($faculties as $faculty)
-        {
-            $unit['code'] = $faculty['code'];
-            $unit['name'] = $faculty['name'];
-            $units[] = $unit;
-        }
+
         $study_programs = [];
         foreach ($faculties as $faculty)
         {
@@ -122,15 +131,15 @@ class UserController extends MainController {
         }
 
         $isSuper = null;
-        $authenticat = null;
+        $authentication= null;
         $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         if($user_authentication->contains('auth_type','SU')){
             $isSuper=true;
-            $authenticat = 'SU';
+            $authentication= 'SU';
         }elseif($user_authentication->contains('auth_type','SAU')){
-            $authenticat = 'SAU';
+            $authentication = 'SAU';
         } elseif($user_authentication->contains('auth_type','AU')){
-            $authenticat = 'AU';
+            $authentication = 'AU';
         }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
             return abort('404');
         }
@@ -143,19 +152,28 @@ class UserController extends MainController {
             'units',
             'study_programs',
             'isSuper',
-            '$authenticat'
+            'authentication'
         ));
     }
 
     public function store(StoreUserRequest $request)
     {
         $user_auths = new Collection();
+        $simsdm = new Simsdm();
+        $units = $simsdm->unitAll();
         foreach ($request->input('auth_type') as $key => $item)
         {
             $user_auth = new UserAuth();
             $user_auth->username = $request->username;
             $user_auth->auth_type = $request->input('auth_type')[$key];
-            $user_auth->unit = $request->input('unit')[$key];
+
+            $unit = $request->input('unit')[$key];
+            if(is_array($units) && in_array($unit, $units)){
+                $user_auth->unit = $unit;
+            }else{
+                $user_auth->sub_unit = $unit;
+            }
+
             $user_auth->created_by = Auth::user()->username;
             $user_auths->push($user_auth);
         }
@@ -212,15 +230,15 @@ class UserController extends MainController {
             }
         }
         $isSuper = null;
-        $authenticat = null;
+        $authentication = null;
         $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         if($user_authentication->contains('auth_type','SU')){
             $isSuper=true;
-            $authenticat = 'SU';
+            $authentication = 'SU';
         }elseif($user_authentication->contains('auth_type','SAU')){
-            $authenticat = 'SAU';
+            $authentication = 'SAU';
         } elseif($user_authentication->contains('auth_type','AU')){
-            $authenticat = 'AU';
+            $authentication = 'AU';
         }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
             return abort('404');
         }
@@ -229,8 +247,6 @@ class UserController extends MainController {
         $user_auth->username_display = $user_auth->username;
         $employee = $simsdm->getEmployee($user_auth->username);
         $user_auth->full_name = $employee->full_name;
-
-
 
         return view('user.user-detail', compact(
             'page_title',
@@ -242,7 +258,7 @@ class UserController extends MainController {
             'user_auths',
             'user_auth',
             'isSuper',
-            'authenticat'
+            'authentication'
         ));
     }
 
@@ -257,12 +273,19 @@ class UserController extends MainController {
         } else
         {
             $user_auths = new Collection();
+            $simsdm = new Simsdm();
+            $units = $simsdm->unitAll();
             foreach ($request->input('auth_type') as $key => $item)
             {
                 $user_auth = new UserAuth();
                 $user_auth->username = $request->username;
                 $user_auth->auth_type = $request->input('auth_type')[$key];
-                $user_auth->unit = $request->input('unit')[$key];
+                $unit = $request->input('unit')[$key];
+                if(is_array($units) && in_array($unit, $units)){
+                    $user_auth->unit = $unit;
+                }else{
+                    $user_auth->sub_unit = $unit;
+                }
                 $user_auth->created_by = Auth::user()->username;
                 $user_auths->push($user_auth);
             }

@@ -53,8 +53,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-//            $login->payload->identity = env('LOGIN_USERNAME');
-            $login->payload->identity = env('USERNAME_LOGIN');
+            $login->payload->identity = env('LOGIN_USERNAME');
+//            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -72,6 +72,7 @@ class CooperationController extends MainController {
             }
             );
         }
+
         if (! $login->logged_in)
         {
             $login_link = JWTAuth::makeLink([
@@ -158,19 +159,11 @@ class CooperationController extends MainController {
         $units = [];
 
         if($isSuper){
-            $faculties = $simsdm->facultyAll();
             $units = $simsdm->unitAll();
-        }elseif($user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+        }elseif($user_auth->contains('auth_type','AU')){
             foreach ($user_auth as $user){
-                $l_faculties = $simsdm->facultyAll();
                 $l_units = $simsdm->unitAll();
 
-                foreach ($l_faculties as $key=>$faculty){
-                    if (is_array($l_faculties) && !in_array($user->unit, $faculty)){
-                        unset($l_faculties[$key]);
-                    }
-                }
-                $faculties = array_merge($faculties, $l_faculties);
                 foreach ($l_units as $key=>$unit){
                     if (is_array($l_units) && !in_array($user->unit, $unit)){
                         unset($l_units[$key]);
@@ -178,9 +171,9 @@ class CooperationController extends MainController {
                 }
                 $units = array_merge($units, $l_units);
             }
-        } elseif (!$user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+        }elseif($user_auth->contains('unit',NULL) && $user_auth->contains('auth_type','AP')){
             $isProdi = true;
-            $prodi = UserAuth::select('unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+            $prodi = UserAuth::select('sub_unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
         return view('cooperation.coop-detail', compact(
@@ -349,10 +342,12 @@ class CooperationController extends MainController {
         if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
             $isSuper=true;
         }
-        if (!$user_auth->contains('auth_type','AU') || $user_auth->contains('auth_type','AP')){
+        if ($user_auth->contains('unit',NULL) && $user_auth->contains('auth_type','AP')){
             $isProdi = true;
-            $prodi = UserAuth::select('unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+            $prodi = UserAuth::select('sub_unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
+
+//        dd($cooperation);
 
         return view('cooperation.coop-detail', compact(
             'page_title',
@@ -370,7 +365,8 @@ class CooperationController extends MainController {
             'coop_tree_relations',
             'disabled',
             'isSuper',
-            'isProdi'
+            'isProdi',
+            'prodi'
         ));
     }
 
