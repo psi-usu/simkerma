@@ -59,7 +59,6 @@ class CooperationController extends MainController {
 //            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
-            dd('server');
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
             {
                 $loggedIn = $credential->logged_in;
@@ -74,6 +73,7 @@ class CooperationController extends MainController {
                 }
             }
             );
+            dd($login);
         }
 
         if (! $login->logged_in)
