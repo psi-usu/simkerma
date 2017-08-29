@@ -48,8 +48,10 @@ class CooperationController extends MainController {
 
     public function index()
     {
+
         if (env('APP_ENV') == 'local')
         {
+            dd('local');
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
@@ -57,6 +59,7 @@ class CooperationController extends MainController {
 //            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
+            dd('server');
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
             {
                 $loggedIn = $credential->logged_in;
