@@ -50,7 +50,6 @@ class CooperationController extends MainController {
     {
         if (env('APP_ENV') == 'local')
         {
-            dd('local');
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
@@ -72,7 +71,6 @@ class CooperationController extends MainController {
             }
             );
         }
-
         if (! $login->logged_in)
         {
             $login_link = JWTAuth::makeLink([
