@@ -97,7 +97,7 @@
                             @endif
                             <form id='tambah_kerma' action="{{url($action_url)}}" method="post"
                                   enctype="multipart/form-data">
-
+                                {{csrf_field()}}
                                 @if($upd_mode != 'create')
                                     <input name="id" type="hidden" value="{{$cooperation['id']}}">
                                 @endif
@@ -173,7 +173,6 @@
                                 @if($upd_mode == 'edit')
                                     <input type="hidden" name="_method" value="PUT">
                                 @endif
-                                {{csrf_field()}}
 
                                 <div class="panel-footer">
                                     <div class="row">

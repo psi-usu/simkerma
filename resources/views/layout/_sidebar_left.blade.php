@@ -19,11 +19,11 @@
     <ul id="tour-9" class="sidebar-menu">
 
         <!-- Start navigation - dashboard -->
-        <li class="submenu {!! Request::is('/', '/') ? 'active' : null !!}">
+        <li class="submenu {!! Request::is('/', 'cooperations/*') ? 'active' : null !!}">
             <a href="{{url('/')}}">
                 <span class="icon"><i class="fa fa-handshake-o"></i></span>
                 <span class="text">Kerjasama</span>
-                {!! Request::is('/', '/') ? '<span class="selected"></span>' : null !!}
+                {!! Request::is('/', 'cooperations/*') ? '<span class="selected"></span>' : null !!}
             </a>
         </li>
         {{--<li class="submenu {!! Request::is('cooperations', 'cooperations/soon-ends') ? 'active' : null !!}">--}}
@@ -46,8 +46,15 @@
                 <li><a href="{{url('units')}}">Unit Kerja</a></li>
             </ul>
         </li>
-
         @can('admin-menu')
+            <li class="submenu {!! Request::is('report', 'report') ? 'active' : null !!}">
+                <a href="{{url('report')}}">
+                    <span class="icon"><i class="fa fa-bar-chart"></i></span>
+                    <span class="text">Laporan</span>
+                    {!! Request::is('report') ? '<span class="selected"></span>' : null !!}
+                </a>
+            </li>
+
             <li class="submenu {!! Request::is('users', 'users/*') ? 'active' : null !!}">
                 <a href="javascript:void(0);">
                     <span class="icon"><i class="fa fa-lock"></i></span>

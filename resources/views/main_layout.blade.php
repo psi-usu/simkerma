@@ -9,6 +9,7 @@
         <meta name="description" content="Sistem Informasi Manajemen Kerja Sama | Universitas Sumatera Utara">
         <meta name="keywords" content="simkerma, sistem informasi manajamen kerja sama, usu, universitas sumatera utara">
         <meta name="author" content="PSI USU">
+        <meta name="csrf-token" content="{{ Session::token() }}">
         <title>SIMKERMA USU - {{$page_title}}</title>
         <!--/ END META SECTION -->
 

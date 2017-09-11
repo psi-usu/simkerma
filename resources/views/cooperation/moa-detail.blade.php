@@ -16,14 +16,12 @@
 @endphp
 
 <!-- MOA -->
-{{-- {{print_r($mou_coops)}} --}}
-{{--{{dd($mou_coops)}}--}}
+{{-- {{print_r($moa_coops)}} --}}
 <div id="MoA" style='display: none !important;'>
     <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
         <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
         <select name="cooperation_id" class="form-control select2" style="width: 100%;" name="cooperation_id" required>
             <option value="" disabled selected>-- Pilih MOU berdasarkan Bidang Kerjasama --</option>
-
             @foreach($mou_coops as $mou_coop)
                 <option value="{{$mou_coop['id']}}"
                         {{$mou_coop['id'] == $coop_id ? "selected" : null}}>
@@ -97,7 +95,7 @@
     </div>
     <div class="form-group {{$errors->has('sign_date') ? 'has-error' : null}}">
         <label for="sign_date" class="control-label">Tanggal Tanda Tangan</label>
-        <input name="sign_date" class="form-control" id="datepicker3" type="text" placeholder="mm/dd/YYYY"
+        <input name="sign_date" class="form-control" id="datepicker3" type="text" placeholder="Tanggal Tanda Tangan"
                value="{{$cooperation['sign_date']}}" required>
         @if($errors->has('sign_date'))
             <label class="error" style="display: inline-block;">
@@ -107,7 +105,7 @@
     </div>
     <div class="form-group {{$errors->has('end_date') ? 'has-error' : null}}">
         <label for="end_date" class="control-label">Tanggal Berakhir</label>
-        <input name="end_date" class="form-control" id="datepicker4" type="text" placeholder="mm/dd/YYYY"
+        <input name="end_date" class="form-control" id="datepicker4" type="text" placeholder="Tanggal Berakhir"
                value="{{$cooperation['end_date']}}" required>
         @if($errors->has('end_date'))
             <label class="error" style="display: inline-block;">
@@ -272,7 +270,8 @@
         <label for="name" class="control-label">Nilai Kontrak</label>
         <input class="form-control" name='contract_amount' type="text" disabled
                data-inputmask="'alias': 'decimal', 'groupSeparator': ',', 'autoGroup': true, 'rightAlign': false"
-               value="{{$cooperation['contract_amount']}}">
+               value="{{$cooperation['contract_amount'].".00"}}">
+{{--        <input type="text" value="{{number_format($cooperation['contract_amount'],2,'.',',')}}">--}}
     </div>
     <div class="form-group {{$errors->has('file_name_ori') ? 'has-error' : null}}">
         <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>

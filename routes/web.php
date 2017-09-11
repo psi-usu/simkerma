@@ -33,6 +33,7 @@ Route::post('cooperations/create', 'CooperationController@store');
 Route::get('cooperations/display', 'CooperationController@display');
 Route::get('cooperations/edit', 'CooperationController@edit');
 Route::put('cooperations/edit', 'CooperationController@update');
+Route::delete('cooperations/delete', 'CooperationController@destroy');
 Route::get('cooperations/download-document', 'CooperationController@downloadDocument');
 Route::get('cooperations/ajax', 'CooperationController@getAjax');
 Route::get('cooperations/ajax/is-having-relation', 'CooperationController@isHavingRelation');
@@ -53,3 +54,7 @@ Route::get('units/ajax', 'UnitController@getAjax');
 
 Route::get('api/1.0/cooperations/search', 'ApiController@searchCoop');
 Route::get('api/1.0/cooperations/{id}', 'ApiController@find');
+
+Route::get('report', 'ReportController@index');
+Route::post('report', 'ReportController@getReport');
+Route::get('report/downloadExcel', 'ReportController@downloadExcel');

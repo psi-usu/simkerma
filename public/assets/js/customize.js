@@ -6,6 +6,15 @@ $(document).ready(function () {
         baseUrl = getUrl.protocol + "//" + getUrl.host + "/";
 
     if ($("#coop-list").length) {
+        // var auth = $('#auth').val();
+        var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
+        // if(auth=='SU'){
+        //     var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button> '+
+        //         '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>';
+        // }else{
+        //     var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
+        // }
+
         var coopDatatable = $("#coop-list").dataTable({
             autoWidth: false,
             responsive: true,
@@ -13,7 +22,7 @@ $(document).ready(function () {
             columnDefs: [
                 {
                     orderable: false,
-                    defaultContent: '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>',
+                    defaultContent: button_action,
                     targets: 7
                 },
                 {
@@ -34,6 +43,21 @@ $(document).ready(function () {
                 }
             ],
         });
+
+        $(document).on("click", "#coop-list a button.delete", function (e) {
+            e.preventDefault();
+            var dt_row = $(this).closest("li").data("dt-row");
+
+            if (dt_row >= 0) {
+                var position = dt_row;
+            } else {
+                var target_row = $(this).closest("tr").get(0);
+                var position = coopDatatable.fnGetPosition(target_row);
+            }
+            var coop_id = coopDatatable.fnGetData(position)[0];
+
+            $("#delete form").attr("action", baseUrl + "cooperations/delete?id=" + coop_id);
+        });
     }
 
     $(document).on("click", ".coop-view-btn", function (e) {
@@ -48,22 +72,6 @@ $(document).ready(function () {
         }
         var id = coopDatatable.fnGetData(position)[0];
         window.open(baseUrl + "cooperations/display?id=" + id, "_self");
-
-        // $.ajax({
-        //     url: baseUrl + 'cooperations/ajax/is-having-relation',
-        //     dataType: "json",
-        //     data: {
-        //         id: id
-        //     },
-        //     success: function (data) {
-        //         if (data['iTotalRecords'] == 0) {
-        //             window.open(baseUrl + "cooperations/display?id=" + id, "_self");
-        //         } else {
-        //             // $("#view").modal("show");
-        //         }
-        //     }
-        // });
-
     });
 
     if ($("#partner-list").length) {
@@ -110,8 +118,6 @@ $(document).ready(function () {
             var partner_id = partnerDatatable.fnGetData(position)[0];
 
             $("#delete form").attr("action", baseUrl + "partners/delete?id=" + partner_id);
-
-            // window.open(baseUrl + "partners/delete?id=" + partner_id);
         });
 
         $(document).on("click", "#partner-list a button.edit", function (e) {
@@ -416,16 +422,6 @@ $(document).ready(function () {
         $("#tambah_kerma input:visible, #tambah_kerma select:visible, #tambah_kerma textarea:visible").attr("disabled", true);
     }
 
-    // $('#pilihan').on('change', function () {
-    //     if (document.getElementById("pilihan").value == "mou") {
-    //         $('#mou_addendum').fadeIn('slow');
-    //         $('#moa_addendum').hide();
-    //     } else {
-    //         $('#moa_addendum').fadeIn('slow');
-    //         $('#mou_addendum').hide();php a
-    //     }
-    // });
-
     if ($(".select2").length) {
         $(".select2").select2();
     }
@@ -648,14 +644,67 @@ $(document).ready(function () {
         $(".search-employee").autocomplete(autocomp_opt);
     }
 
-    // $(".auth_type_user").change(function () {
-    //     alert($(this).val());
-    //     if ($(this).val() == 'AU') {
-    //         $('#unit').fadeIn();
-    //         $('#sub_unit').fadeOut();
-    //     }else{
-    //         $('#unit').fadeOut();
-    //         $('#sub_unit').fadeIn();
-    //     }
-    // });
+    $('#report_coop').on('submit', function (e) {
+        e.preventDefault();
+        var coop_type = $('#coop_type').val();
+        var sign_date = $('#sign_date').val();
+        var end_date = $('#end_date').val();
+        var partner = $('#partner').val();
+        $('.loading').fadeIn('slow');
+        $('#result').fadeOut('slow');
+        $.ajax({
+            url     : baseUrl + 'report',
+            type    : 'POST',
+            dataType : 'json',
+            data    : $('#report_coop').serialize(), '_token': $('meta[name=csrf-token]').attr('content'),
+            success: function(response){
+                console.log(response);
+                $('.loading').fadeOut('slow');
+                if(response.length>0){
+                    $("#btn-download").fadeIn('slow');
+                }
+
+                $("#result").fadeIn('slow');
+
+                var table='';
+                var head = "<thead><tr>" +
+                                "<td><b>No</b></td>" +
+                                "<td><b>Instansi / Unit </b></td>" +
+                                "<td><b>Jenis Kerjasama</b></td>" +
+                                "<td><b>Bidang Kerjasama</b></td>" +
+                                "<td><b>Unit Pelaksana</b></td>" +
+                                "<td><b>Tanggal Tanda Tangan</b></td>" +
+                                "<td><b>Tanggal Berakhir Kerjasama</b></td>" +
+                            "</tr></thead>";
+                table += head;
+                var data = "";
+
+                $.each(response, function(key, item) {
+                    var tr = "";
+                    tr += '<tr><td>'+ item.no+ '</td>'+
+                            '<td>'+ item.partner+ '</td>'+
+                            '<td>'+ item.coop_type+ '</td>'+
+                            '<td>'+ item.area_of_coop+ '</td>'+
+                            '<td>'+ item.unit+ '</td>'+
+                            '<td>'+ item.sign_date+ '</td>'+
+                            '<td>'+ item.end_date+ '</td>'+
+                            '</tr>';
+
+                    data += tr;
+                });
+                var tbody = "<tbody>"+ data +"</tbody>";
+                table += tbody;
+                // alert(tbody);
+
+                $("#table-report").html(table);
+                $("#table-report").dataTable();
+
+                $("#btn-download").attr("href", baseUrl + "report/downloadExcel?coop_type=" + coop_type + "&sign_date=" + sign_date + "&end_date=" + end_date +"&partner=" +partner);
+            },
+            error:function(data){
+                alert(data.status);
+            }
+
+        });
+    });
 });

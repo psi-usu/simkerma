@@ -37,7 +37,7 @@
     </div>
     <div class="form-group {{$errors->has('sign_date') ? 'has-error' : null}}">
         <label for="sign_date" class="control-label">Tanggal Tanda Tangan</label>
-        <input name="sign_date" class="form-control" id="datepicker" type="text"
+        <input name="sign_date" class="form-control" id="datepicker" type="text" placeholder="Tanggal Tanda Tangan"
                value="{{$cooperation['sign_date']}}" {{$disabled}} required>
         @if($errors->has('sign_date'))
             <label class="error" style="display: inline-block;">
@@ -47,7 +47,7 @@
     </div>
     <div class="form-group {{$errors->has('end_date') ? 'has-error' : null}}">
         <label for="end_date" class="control-label">Tanggal Berakhir</label>
-        <input name="end_date" class="form-control" id="datepicker2" type="text"
+        <input name="end_date" class="form-control" id="datepicker2" type="text" placeholder="Tanggal Berakhir"
                value="{{$cooperation['end_date']}}" {{$disabled}} required>
         @if($errors->has('end_date'))
             <label class="error" style="display: inline-block;">
@@ -95,7 +95,7 @@
     <div class="form-group">
         <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>
         @if($disabled == null)
-            <input name="file_name_ori" id="fileinput-mou-doc" type="file" class="file" accept=".pdf" required>
+            <input name="file_name_ori" id="fileinput-mou-doc" type="file" class="file" accept=".pdf">
             @if($errors->has('file_name_ori'))
                 <label class="error" style="display: inline-block;">
                     {{$errors->first('file_name_ori')}}

@@ -54,6 +54,7 @@ class CooperationController extends MainController {
             $login->logged_in = true;
             $login->payload = new \stdClass();
             $login->payload->identity = env('LOGIN_USERNAME');
+//            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -91,10 +92,17 @@ class CooperationController extends MainController {
 
             $page_title = 'Kerjasama';
 
-            return view('cooperation.coop-list', compact('page_title'));
-        }
+            $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+            $auth = null;
 
-        return view('cooperation.coop-list', compact('page_title'));
+            if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+                $auth = 'SU';
+            }else{
+                $auth = 'Admin';
+            }
+
+            return view('cooperation.coop-list', compact('page_title','auth'));
+        }
     }
 
     public function soonEndsList()
@@ -129,15 +137,20 @@ class CooperationController extends MainController {
 
         $moa_coops = new Collection();
         foreach ($user_auth as $user){
-            $moa_coop = Cooperation::where('coop_type', 'MOA')->where('unit',$user->unit)->get();
+            if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
+            }else{
+                $moa_coop = Cooperation::where('coop_type', 'MOA')->where('unit',$user->unit)->get();
 
-            if($moa_coop){
-                $merged = $moa_coops->merge($moa_coop);
-                $moa_coops = $merged;
-            }
-            $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->unit)->get();
-            if($moa_coop_sub){
-                $moa_coops->merge($moa_coop_sub);
+                if($moa_coop){
+                    $merged = $moa_coops->merge($moa_coop);
+                    $moa_coops = $merged;
+                }
+
+                $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->sub_unit)->get();
+                if($moa_coop_sub){
+                    $moa_coops->merge($moa_coop_sub);
+                }
             }
         }
 
@@ -201,8 +214,10 @@ class CooperationController extends MainController {
         {
             $cooperation = $this->moveCorresponding($input);
             $cooperation['created_by'] = Auth::user()->username;
-            $cooperation['sign_date'] = date('Y-m-d', strtotime($cooperation['sign_date']));
-            $cooperation['end_date'] = date('Y-m-d', strtotime($cooperation['end_date']));
+            $date1 = str_replace('/', '-', $cooperation['sign_date']);
+            $cooperation['sign_date'] = date('Y-m-d', strtotime($date1));
+            $date2 = str_replace('/', '-', $cooperation['end_date']);
+            $cooperation['end_date'] = date('Y-m-d', strtotime($date2));
             $cooperation->status = 'submit';
             $cooperation->contract_amount = 0;
 
@@ -231,8 +246,20 @@ class CooperationController extends MainController {
                 }
             }
 
-            $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
-            $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+            $file = $request->file('file_name_ori');
+
+            if ($cooperation->coop_type == 'ADDENDUM'){
+                if(!isset($file)){
+                    $cooperation->file_name_ori = $relation_coop->file_name_ori;
+                    $cooperation->file_name = $relation_coop->file_name;
+                }else{
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            }else{
+                $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+            }
 
             $cooperation->save();
 
@@ -248,9 +275,19 @@ class CooperationController extends MainController {
             else
                 $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
 
-            if (! is_null($request->file('file_name_ori')))
-            {
-                $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+            if($cooperation->coop_type == 'ADDENDUM'){
+                if(!isset($file)){
+                    $path1 = Storage::url('upload/'. $relation_coop->coop_type .'/'. $input['cooperation_id'] .'/'. $relation_coop->file_name);
+                    $path2 = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id . '/'. $relation_coop->file_name);
+                    Storage::copy($path1, $path2);
+                }else{
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
+            }else{
+                if (! is_null($request->file('file_name_ori')))
+                {
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
             }
         });
 
@@ -346,8 +383,6 @@ class CooperationController extends MainController {
             $prodi = UserAuth::select('sub_unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
-//        dd($cooperation);
-
         return view('cooperation.coop-detail', compact(
             'page_title',
             'upd_mode',
@@ -367,6 +402,26 @@ class CooperationController extends MainController {
             'isProdi',
             'prodi'
         ));
+    }
+
+    public function destroy()
+    {
+        $id = Input::get('id');
+
+        $coop = Cooperation::find($id);
+        $coop->coopItem()->delete();
+        if(empty($coop))
+        {
+            return abort('404');
+        }
+
+        $deleted = $coop->delete();
+        if($deleted)
+            session()->flash('alert-success', 'Kerjasama berhasil dihapus');
+        else
+            session()->flash('alert-danger', 'Terjadi kesalahan pada sistem, Kerjasama gagal dihapus');
+
+        return redirect()->intended('/');
     }
 
     public function edit()
@@ -474,7 +529,7 @@ class CooperationController extends MainController {
             $data['data'][$i][3] = $partner->name;
             $data['data'][$i][4] = $coop_type->type;
             $data['data'][$i][5] = $cooperation->form_of_coop;
-            $data['data'][$i][6] = $cooperation->end_date;
+            $data['data'][$i][6] = date('d-m-Y', strtotime($cooperation->end_date));
 
             $i++;
         }
@@ -510,6 +565,9 @@ class CooperationController extends MainController {
             } elseif ($cooperation->coop_type == 'MOA')
             {
                 $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
+            }elseif ($cooperation->coop_type == 'ADDENDUM')
+            {
+                $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
             }
             $path = storage_path() . '/app' . $path . '/' . $cooperation->file_name;
         }
@@ -703,14 +761,55 @@ class CooperationController extends MainController {
             }
         }
         $addendum_coops = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $mou_coop->id)->get(); //ADDENDUM MOU
-        $moa_coops = Cooperation::where("coop_type", "MOA")->where("cooperation_id", $mou_coop->id)->get(); //MOA
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        $moa_coops = new Collection();
+        foreach ($user_auth as $user){
+            if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                $moa_coops = Cooperation::where("coop_type", "MOA")->where("cooperation_id", $mou_coop->id)->get(); //MOA
+            }else{
+                $moa_coop = Cooperation::where('coop_type', 'MOA')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
+
+                if($moa_coop){
+                    $merged = $moa_coops->merge($moa_coop);
+                    $moa_coops = $merged;
+                }
+
+                $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->sub_unit)->get();
+                if($moa_coop_sub){
+                    $moa_coops->merge($moa_coop_sub);
+                }
+            }
+        }
+
         $moa_addendum_coops = new Collection(); // ADDENDUM MOA
         foreach ($moa_coops as $moa_coop)
         {
-            $moa_addendums = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->get();
-            foreach ($moa_addendums as $moa_addendum)
-            {
-                $moa_addendum_coops->add($moa_addendum);
+            foreach ($user_auth as $user){
+                if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                    $moa_addendums = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->get();
+                    foreach ($moa_addendums as $moa_addendum)
+                    {
+                        $moa_addendum_coops->add($moa_addendum);
+                    }
+                }else{
+                    $moa_addendums_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('unit',$user->unit)->get();
+                    if($moa_addendums_unit){
+                        foreach ($moa_addendums_unit as $moa_addendum)
+                        {
+                            $moa_addendum_coops->add($moa_addendum);
+                        }
+                    }
+
+                    $moa_addendums_sub_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('sub_unit',$user->sub_unit)->get();
+                    if($moa_addendums_sub_unit){
+                        foreach ($moa_addendums_sub_unit as $moa_addendum)
+                        {
+                            $moa_addendum_coops->add($moa_addendum);
+                        }
+                    }
+                }
             }
         }
 

@@ -25,20 +25,11 @@ class StoreCooperationRequest extends FormRequest {
      */
     public function rules()
     {
-//        if ($this->input('save_temporary') == 1)
-//        {
-//            return [
-//                'coop_type' => 'max:10',
-//                'sign_date' => 'date',
-//                'end_date'  => 'date',
-//                'unit'      => 'max:30',
-//            ];
-//        } else
-//        {
+//        dd($this->input());
         $rules = [
             'area_of_coop'   => 'required',
             'sign_date'      => 'required|date',
-            'end_date'       => 'required|date',
+            'end_date'       => 'required',
             'usu_doc_no'     => 'required',
             'partner_doc_no' => 'required',
         ];
@@ -71,10 +62,12 @@ class StoreCooperationRequest extends FormRequest {
             $rules = array_add($rules, 'form_of_coop', 'required');
         }
 
-        if ($this->input('id') == null)
-        {
+        if ($this->input('coop_type') == 'MOA' || $this->input('coop_type') == 'MOU' ){
             $rules = array_add($rules, 'coop_type', 'required|max:10');
             $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
+        }else{
+            $rules = array_add($rules, 'coop_type', 'max:10');
+            $rules = array_add($rules, 'file_name_ori', 'mimes:pdf');
         }
 
         return $rules;
