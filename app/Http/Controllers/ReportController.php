@@ -166,10 +166,6 @@ class ReportController extends MainController
         return response($data, 200)->header('Content-Type', 'application/json');
     }
 
-    public function importExport()
-    {
-        return view('importExport');
-    }
     public function downloadExcel()
     {
         $simsdm = new Simsdm();

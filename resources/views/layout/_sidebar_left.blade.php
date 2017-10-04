@@ -1,9 +1,9 @@
 <!-- START @SIDEBAR LEFT -->
 <aside id="sidebar-left" class="sidebar-circle">
     <!-- Start left navigation - profile shortcut -->
-    <div id="tour-8" class="sidebar-content">
+    <div class="sidebar-content">
         <div class="media">
-            <a class="pull-left has-notif avatar" href="{{url('user/profile')}}">
+            <a class="pull-left has-notif avatar">
                 <img src="{{$user_info['photo']}}" alt="admin">
                 <i class="online"></i>
             </a>
@@ -19,19 +19,29 @@
     <ul id="tour-9" class="sidebar-menu">
 
         <!-- Start navigation - dashboard -->
-        <li class="submenu {!! Request::is('/', 'cooperations/*') ? 'active' : null !!}">
-            <a href="{{url('/')}}">
+        <li class="submenu {!! Request::is('cooperations') ? 'active' : null !!}">
+            <a href="{{url('cooperations')}}">
                 <span class="icon"><i class="fa fa-handshake-o"></i></span>
                 <span class="text">Kerjasama</span>
-                {!! Request::is('/', 'cooperations/*') ? '<span class="selected"></span>' : null !!}
+                {!! Request::is('cooperations') ? '<span class="selected"></span>' : null !!}
             </a>
         </li>
-        {{--<li class="submenu {!! Request::is('cooperations', 'cooperations/soon-ends') ? 'active' : null !!}">--}}
-            {{--<a href="{{url('cooperations/soon-ends')}}">--}}
-                {{--<span class="icon"><i class="fa fa-handshake-o"></i></span>--}}
-                {{--<span class="text">Kerjasama Segera Berakhir</span>--}}
-            {{--</a>--}}
-        {{--</li>--}}
+        <li class="submenu {!! Request::is('/', 'cooperations/soon-ends') ? 'active' : null !!}">
+            <a href="{{url('/', 'cooperations/soon-ends')}}">
+                <span class="icon"><i class="fa fa-hand-stop-o"></i></span>
+                <span class="text">Kerjasama Segera Berakhir</span>
+                {!! Request::is('/', 'cooperations/soon-ends') ? '<span class="selected"></span>' : null !!}
+            </a>
+        </li>
+        @can('admin-menu')
+            <li class="submenu {!! Request::is('cooperations/approve-list') ? 'active' : null !!}">
+                <a href="{{url('cooperations/approve-list')}}">
+                    <span class="icon"><i class="fa fa-check-square-o"></i></span>
+                    <span class="text">Approve Kerjasama</span>
+                    {!! Request::is('cooperations/approve-list') ? '<span class="selected"></span>' : null !!}
+                </a>
+            </li>
+        @endcan
         <li class="submenu {!! Request::is('partners', 'partners/*', 'units') ? 'active' : null !!}">
             <a href="javascript:void(0);">
                 <span class="icon"><i class="fa fa-dot-circle-o"></i></span>

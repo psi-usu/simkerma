@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Approval;
 use App\Cooperation;
 use App\CoopItem;
 use App\CoopType;
@@ -107,18 +108,47 @@ class CooperationController extends MainController {
 
     public function soonEndsList()
     {
-        return ('cooperation.coop-soon-ends');
+        $page_title = 'Kerjasama Segera Berakhir';
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+        $auth = null;
+
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $auth = 'SU';
+        }else{
+            $auth = 'Admin';
+        }
+
+        return view('cooperation.coop-soon-ends', compact('page_title','auth'));
+    }
+
+    public function approveList()
+    {
+        $page_title = 'Approve Kerjasama';
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+        $auth = null;
+
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $auth = 'SU';
+        }else{
+            $auth = 'Admin';
+        }
+
+        return view('cooperation.coop-approve-list', compact('page_title','auth'));
     }
 
     public function create()
     {
         array_push($this->css['pages'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/css/datepicker.css');
         array_push($this->css['pages'], 'kartik-v/bootstrap-fileinput/css/fileinput.min.css');
+        array_push($this->css['pages'], 'css/jquery-confirm.min.css');
 
         array_push($this->js['scripts'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/js/bootstrap-datepicker.js');
         array_push($this->js['scripts'], 'global/plugins/bower_components/jquery-validation/dist/jquery.validate.min.js');
         array_push($this->js['scripts'], 'kartik-v/bootstrap-fileinput/js/fileinput.min.js');
         array_push($this->js['scripts'], 'global/plugins/bower_components/jquery.inputmask/dist/jquery.inputmask.bundle.min.js');
+        array_push($this->js['scripts'], 'js/jquery-confirm.min.js');
 
         View::share('css', $this->css);
         View::share('js', $this->js);
@@ -131,7 +161,7 @@ class CooperationController extends MainController {
         $partner_id_Coop = Cooperation::select('partner_id')->where('coop_type','MOU')->where('deleted_at',null)->get();
         $partners = Partner::whereNotIn('id', $partner_id_Coop)->get();
         $coop_types = CoopType::all();
-        $mou_coops = Cooperation::where('coop_type', 'MOU')->with('partner')->get();
+        $mou_coops = Cooperation::where('coop_type', 'MOU')->where('status','AC')->with('partner')->get();
 
         $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
 
@@ -159,7 +189,6 @@ class CooperationController extends MainController {
         $coop_items->add($coop_item);
 
         $isSuper = null;
-        $isProdi = null;
 
         $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
 
@@ -172,6 +201,8 @@ class CooperationController extends MainController {
 
         if($isSuper){
             $units = $simsdm->unitAll();
+            $usu = array("id"=>"","code"=>"USU","name"=>"Universitas Sumatera Utara");
+            array_push($units,$usu);
         }elseif($user_auth->contains('auth_type','AU')){
             foreach ($user_auth as $user){
                 $l_units = $simsdm->unitAll();
@@ -183,9 +214,6 @@ class CooperationController extends MainController {
                 }
                 $units = array_merge($units, $l_units);
             }
-        }elseif($user_auth->contains('unit',NULL) && $user_auth->contains('auth_type','AP')){
-            $isProdi = true;
-            $prodi = UserAuth::select('sub_unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
         return view('cooperation.coop-detail', compact(
@@ -199,9 +227,7 @@ class CooperationController extends MainController {
             'faculties',
             'units',
             'coop_items',
-            'isSuper',
-            'isProdi',
-            'prodi'
+            'isSuper'
         ));
     }
 
@@ -218,14 +244,14 @@ class CooperationController extends MainController {
             $cooperation['sign_date'] = date('Y-m-d', strtotime($date1));
             $date2 = str_replace('/', '-', $cooperation['end_date']);
             $cooperation['end_date'] = date('Y-m-d', strtotime($date2));
-            $cooperation->status = 'submit';
+            $cooperation->status = 'SB';
             $cooperation->contract_amount = 0;
 
             if ($cooperation->coop_type == 'ADDENDUM')
                 $relation_coop = Cooperation::find($input['cooperation_id']);
 
-            if ($cooperation->coop_type == 'MOA' ||
-                ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA')
+            if ($cooperation->coop_type == 'SPK' ||
+                ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA' || $cooperation->coop_type == 'MOA')
             )
             {
                 if (isset($input['item_name']))
@@ -236,6 +262,7 @@ class CooperationController extends MainController {
                         $coop_item = new CoopItem();
                         $coop_item->item = $key;
                         $coop_item->item_name = $input['item_name'][$key];
+
                         $coop_item->item_quantity = $input['item_quantity'][$key];
                         $coop_item->item_uom = $input['item_uom'][$key];
                         $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
@@ -261,6 +288,10 @@ class CooperationController extends MainController {
                 $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
             }
 
+            if (!$cooperation->coop_type == 'SPK'){
+                $cooperation->benefit = $input['benefit'];
+            }
+
             $cooperation->save();
 
             if (isset($coop_items))
@@ -272,6 +303,119 @@ class CooperationController extends MainController {
                 $path = Storage::url('upload/' . 'MOU/' . $cooperation->id);
             elseif ($cooperation->coop_type == 'MOA')
                 $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
+            elseif ($cooperation->coop_type == 'SPK')
+                $path = Storage::url('upload/' . 'SPK/' . $cooperation->id);
+            else
+                $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
+
+            if($cooperation->coop_type == 'ADDENDUM'){
+                if(!isset($file)){
+                    $path1 = Storage::url('upload/'. $relation_coop->coop_type .'/'. $input['cooperation_id'] .'/'. $relation_coop->file_name);
+                    $path2 = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id . '/'. $relation_coop->file_name);
+                    Storage::copy($path1, $path2);
+                }else{
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
+            }else{
+                if (! is_null($request->file('file_name_ori')))
+                {
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
+            }
+
+        });
+
+        $request->session()->flash('alert-success', 'Kerjasama berhasil dibuat');
+
+        return redirect()->intended('/');
+    }
+
+    public function storeTemp(Request $request)
+    {
+        $this->authorize('create', Cooperation::class);
+        $input = Input::all();
+
+        DB::transaction(function () use ($input, $request) {
+            $cooperation = $this->moveCorresponding($input);
+            $cooperation['created_by'] = Auth::user()->username;
+            $date1 = str_replace('/', '-', $cooperation['sign_date']);
+            $cooperation['sign_date'] = date('Y-m-d', strtotime($date1));
+            $date2 = str_replace('/', '-', $cooperation['end_date']);
+            $cooperation['end_date'] = date('Y-m-d', strtotime($date2));
+            $cooperation->status = 'SS';
+            $cooperation->contract_amount = 0;
+
+            if ($cooperation->coop_type == 'ADDENDUM')
+                $relation_coop = Cooperation::find($input['cooperation_id']);
+
+            if ($cooperation->coop_type == 'SPK' ||
+                ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA' || $cooperation->coop_type == 'MOA')
+            )
+            {
+                if (isset($input['item_name']))
+                {
+                    $coop_items = new Collection();
+                    foreach ($input['item_name'] as $key => $item)
+                    {
+                        if (!isset($cooperation->id))
+                        {
+                            $coop_item = new CoopItem();
+                        }
+                        else{
+                            $cooperation->coopItem()->delete();
+                            $coop_item = new CoopItem();
+                        }
+
+                        $coop_item->item = $key;
+                        $coop_item->item_name = $input['item_name'][$key];
+
+                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_uom = $input['item_uom'][$key];
+                        if(isset($coop_item->item_total_amount)){
+                            $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
+                        }else{
+                            $coop_item->item_total_amount = 0;
+                        }
+                        $coop_item->item_annotation = $input['item_annotation'][$key];
+                        $cooperation->contract_amount += $coop_item->item_total_amount;
+                        $coop_items->add($coop_item);
+                    }
+                }
+            }
+
+            $file = $request->file('file_name_ori');
+            if ($cooperation->coop_type == 'ADDENDUM'){
+                if(!isset($file)){
+                    $cooperation->file_name_ori = $relation_coop->file_name_ori;
+                    $cooperation->file_name = $relation_coop->file_name;
+                }else{
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            }else{
+                if(!is_null($file)){
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            }
+
+            if (!$cooperation->coop_type == 'SPK'){
+                $cooperation->benefit = $input['benefit'];
+            }
+
+            $cooperation->save();
+
+            if (isset($coop_items))
+            {
+                $cooperation->coopItem()->saveMany($coop_items);
+            }
+
+            if ($cooperation->coop_type == 'MOU')
+                $path = Storage::url('upload/' . 'MOU/' . $cooperation->id);
+            elseif ($cooperation->coop_type == 'MOA')
+                $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
+            elseif ($cooperation->coop_type == 'SPK')
+                $path = Storage::url('upload/' . 'SPK/' . $cooperation->id);
             else
                 $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
 
@@ -290,8 +434,7 @@ class CooperationController extends MainController {
                 }
             }
         });
-
-        $request->session()->flash('alert-success', 'Kerjasama berhasil dibuat');
+        $request->session()->flash('alert-success', 'Kerjasama berhasil disimpan sementara');
 
         return redirect()->intended('/');
     }
@@ -301,6 +444,7 @@ class CooperationController extends MainController {
         $this->authorize('update', Cooperation::class);
 
         $input = Input::all();
+        dd($input);
 
         DB::transaction(function () use ($input, $request)
         {
@@ -308,22 +452,188 @@ class CooperationController extends MainController {
             $cooperation['updated_by'] = Auth::user()->username;
             $cooperation['sign_date'] = date('Y-m-d', strtotime($cooperation['sign_date']));
             $cooperation['end_date'] = date('Y-m-d', strtotime($cooperation['end_date']));
+            $cooperation['status'] = 'SB';
 
-            if (! is_null($request->file('file_name_ori')))
+            $cooperation->contract_amount = 0;
+
+            if ($cooperation->coop_type == 'ADDENDUM')
+                $relation_coop = Cooperation::find($input['cooperation_id']);
+
+            if ($cooperation->coop_type == 'SPK' ||
+                ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA' || $cooperation->coop_type == 'MOA')
+            )
             {
+                if (isset($input['item_name']))
+                {
+                    $coop_items = new Collection();
+                    foreach ($input['item_name'] as $key => $item)
+                    {
+                        if (isset($cooperation->id))
+                        {
+                            $cooperation->coopItem()->delete();
+                            $coop_item = new CoopItem();
+                        }
+                        else{
+                            $coop_item = new CoopItem();
+                        }
+
+                        $coop_item->item = $key;
+                        $coop_item->item_name = $input['item_name'][$key];
+
+                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_uom = $input['item_uom'][$key];
+                        $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
+                        $coop_item->item_annotation = $input['item_annotation'][$key];
+                        $cooperation->contract_amount += $coop_item->item_total_amount;
+                        $coop_items->add($coop_item);
+                    }
+                }
+                if (isset($coop_items))
+                {
+                    $cooperation->coopItem()->saveMany($coop_items);
+                }
+            }
+
+            $file = $request->file('file_name_ori');
+
+            if ($cooperation->coop_type == 'ADDENDUM'){
+                if(!isset($file)){
+                    $cooperation->file_name_ori = $relation_coop->file_name_ori;
+                    $cooperation->file_name = $relation_coop->file_name;
+                }else{
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            }else{
                 $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
                 $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
-                if ($cooperation->coop_type == 'MOU')
-                    $path = Storage::url('upload/' . 'MOU/' . $cooperation->id);
-                elseif ($cooperation->coop_type == 'MOA')
-                    $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
-                else
-                    $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
-
-                Storage::delete($path . '/' . $cooperation->file_name);
-                $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
             }
+
+            if (!$cooperation->coop_type == 'SPK'){
+                $cooperation->benefit = $input['benefit'];
+            }
+
             $cooperation->save();
+        });
+
+        $request->session()->flash('alert-success', 'Kerjasama berhasil di-update');
+
+        return redirect()->intended('/');
+    }
+
+    public function updateTemp(Request $request)
+    {
+        $this->authorize('update', Cooperation::class);
+
+        $input = Input::all();
+
+        DB::transaction(function () use ($input, $request) {
+            $cooperation = $this->moveCorresponding($input);
+            $cooperation['updated_by'] = Auth::user()->username;
+            $cooperation['sign_date'] = date('Y-m-d', strtotime($cooperation['sign_date']));
+            $cooperation['end_date'] = date('Y-m-d', strtotime($cooperation['end_date']));
+            $cooperation['status'] = 'SS';
+
+            if ($cooperation['coop_type'] == 'ADDENDUM')
+                $relation_coop = Cooperation::find($input['cooperation_id']);
+
+            if ($cooperation->coop_type == 'SPK' ||
+                ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA' || $cooperation->coop_type == 'MOA')
+            )
+            {
+                if (isset($input['item_name']))
+                {
+                    $coop_items = new Collection();
+                    foreach ($input['item_name'] as $key => $item)
+                    {
+                        if (! isset($cooperation->id))
+                        {
+                            $coop_item = new CoopItem();
+                        } else
+                        {
+                            $cooperation->coopItem()->delete();
+                            $coop_item = new CoopItem();
+                        }
+
+                        $coop_item->item = $key;
+                        $coop_item->item_name = $input['item_name'][$key];
+
+                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_uom = $input['item_uom'][$key];
+                        if (isset($coop_item->item_total_amount))
+                        {
+                            $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
+                        } else
+                        {
+                            $coop_item->item_total_amount = 0;
+                        }
+                        $coop_item->item_annotation = $input['item_annotation'][$key];
+                        $cooperation->contract_amount += $coop_item->item_total_amount;
+                        $coop_items->add($coop_item);
+                    }
+                }
+            }
+
+            $file = $request->file('file_name_ori');
+            if ($cooperation->coop_type == 'ADDENDUM')
+            {
+                if (! isset($file))
+                {
+                    $cooperation->file_name_ori = $relation_coop->file_name_ori;
+                    $cooperation->file_name = $relation_coop->file_name;
+                } else
+                {
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            } else
+            {
+                if (! is_null($file))
+                {
+                    $cooperation->file_name_ori = $request->file('file_name_ori')->getClientOriginalName();
+                    $cooperation->file_name = sha1($cooperation->file_name_ori . Carbon::now()->toDateTimeString()) . '.' . $request->file('file_name_ori')->getClientOriginalExtension();
+                }
+            }
+
+            if (! $cooperation->coop_type == 'SPK')
+            {
+                $cooperation->benefit = $input['benefit'];
+            }
+
+            $cooperation->save();
+
+            if (isset($coop_items))
+            {
+                $cooperation->coopItem()->saveMany($coop_items);
+            }
+
+            if ($cooperation->coop_type == 'MOU')
+                $path = Storage::url('upload/' . 'MOU/' . $cooperation->id);
+            elseif ($cooperation->coop_type == 'MOA')
+                $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
+            elseif ($cooperation->coop_type == 'SPK')
+                $path = Storage::url('upload/' . 'SPK/' . $cooperation->id);
+            else
+                $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
+
+            if ($cooperation->coop_type == 'ADDENDUM')
+            {
+                if (! isset($file))
+                {
+                    $path1 = Storage::url('upload/' . $relation_coop->coop_type . '/' . $input['cooperation_id'] . '/' . $relation_coop->file_name);
+                    $path2 = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id . '/' . $relation_coop->file_name);
+                    Storage::copy($path1, $path2);
+                } else
+                {
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
+            } else
+            {
+                if (! is_null($request->file('file_name_ori')))
+                {
+                    $request->file('file_name_ori')->storeAs($path, $cooperation->file_name);
+                }
+            }
         });
 
         $request->session()->flash('alert-success', 'Kerjasama berhasil di-update');
@@ -334,7 +644,8 @@ class CooperationController extends MainController {
     public function display()
     {
         $input = Input::all();
-        if (! isset($input['id']))
+        $cooperation = Cooperation::find($input['id']);
+        if (! isset($input['id']) || empty($cooperation))
         {
             return abort('404');
         }
@@ -354,15 +665,24 @@ class CooperationController extends MainController {
         $upd_mode = 'display';
         $action_url = 'cooperations/display';
         $disabled = 'disabled';
+        $coop_relations = Cooperation::where('cooperation_id', $cooperation->id)->get();
+
+        if (! $coop_relations->isEmpty())
+        {
+            $is_relation = 'disabled';
+        }
 
         $simsdm = new Simsdm();
-        $cooperation = Cooperation::find($input['id']);
         $cooperation->sign_date = date('d-m-Y', strtotime($cooperation->sign_date));
         $cooperation->end_date = date('d-m-Y', strtotime($cooperation->end_date));
         $partners = Partner::all();
         $coop_types = CoopType::all();
         $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
+
+        $usu = array("id"=>"","code"=>"USU","name"=>"Universitas Sumatera Utara");
+        array_push($units,$usu);
+
         $mou_coops = Cooperation::where('coop_type', 'MOU')->get();
         $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
         $coop_items = $cooperation->coopItem()->get();
@@ -377,10 +697,6 @@ class CooperationController extends MainController {
         $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
         if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
             $isSuper=true;
-        }
-        if ($user_auth->contains('unit',NULL) && $user_auth->contains('auth_type','AP')){
-            $isProdi = true;
-            $prodi = UserAuth::select('sub_unit')->where('username',$this->user_info['username'])->where('deleted_at',null)->get();
         }
 
         return view('cooperation.coop-detail', compact(
@@ -399,23 +715,152 @@ class CooperationController extends MainController {
             'coop_tree_relations',
             'disabled',
             'isSuper',
-            'isProdi',
-            'prodi'
+            'is_relation'
         ));
+    }
+
+    public function approve()
+    {
+        $input = Input::all();
+        $cooperation = Cooperation::find($input['id']);
+        if (! isset($input['id']) || empty($cooperation))
+        {
+            return abort('404');
+        }
+
+        array_push($this->css['pages'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/css/datepicker.css');
+        array_push($this->css['pages'], 'kartik-v/bootstrap-fileinput/css/fileinput.min.css');
+        array_push($this->css['pages'], 'css/jquery-confirm.min.css');
+
+        array_push($this->js['scripts'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/js/bootstrap-datepicker.js');
+        array_push($this->js['scripts'], 'global/plugins/bower_components/jquery-validation/dist/jquery.validate.min.js');
+        array_push($this->js['scripts'], 'kartik-v/bootstrap-fileinput/js/fileinput.min.js');
+        array_push($this->js['scripts'], 'global/plugins/bower_components/jquery.inputmask/dist/jquery.inputmask.bundle.min.js');
+        array_push($this->js['scripts'], 'js/jquery-confirm.min.js');
+
+        View::share('css', $this->css);
+        View::share('js', $this->js);
+
+        $page_title = "Detail Kerjasama";
+        $upd_mode = 'approve';
+        $action_url = 'cooperations/approve';
+        $disabled = 'disabled';
+        $coop_relations = Cooperation::where('cooperation_id', $cooperation->id)->get();
+
+        if (! $coop_relations->isEmpty())
+        {
+            $is_relation = 'disabled';
+        }
+
+        $simsdm = new Simsdm();
+        $cooperation->sign_date = date('d-m-Y', strtotime($cooperation->sign_date));
+        $cooperation->end_date = date('d-m-Y', strtotime($cooperation->end_date));
+        $partners = Partner::all();
+        $coop_types = CoopType::all();
+        $faculties = $simsdm->facultyAll();
+        $units = $simsdm->unitAll();
+        $approve = "disabled";
+
+        $usu = array("id"=>"","code"=>"USU","name"=>"Universitas Sumatera Utara");
+        array_push($units,$usu);
+
+        $mou_coops = Cooperation::where('coop_type', 'MOU')->get();
+        $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
+        $coop_items = $cooperation->coopItem()->get();
+        if ($cooperation->coop_type == 'ADDENDUM')
+        {
+            $prev_coop = Cooperation::find($cooperation->cooperation_id);
+        }
+        $coop_tree_relations = $this->getCoopRelation($input['id']);
+
+        $isSuper = null;
+        $isProdi = null;
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $isSuper=true;
+        }
+
+        return view('cooperation.coop-detail', compact(
+            'page_title',
+            'upd_mode',
+            'action_url',
+            'cooperation',
+            'partners',
+            'coop_types',
+            'faculties',
+            'units',
+            'mou_coops',
+            'moa_coops',
+            'prev_coop',
+            'coop_items',
+            'coop_tree_relations',
+            'disabled',
+            'isSuper',
+            'is_relation',
+            'approve'
+        ));
+    }
+
+    public function approveStore(Request $request)
+    {
+        $this->authorize('create', Cooperation::class);
+        $input = Input::all();
+
+        $cooperation = Cooperation::find($input['id']);
+
+        if(empty($input['id'] || empty($cooperation)))
+            return abort('404');
+
+        DB::transaction(function () use ($input, $request, $cooperation) {
+            $approval = new Approval();
+            $approval->cooperation_id = $request->id;
+            $approval->note = $request->note;
+            $cooperation->status = $request->status;
+
+            $cooperation->save();
+            $approval->save();
+        });
+        $request->session()->flash('alert-success', 'Kerjasama berhasil di approve');
+
+        return redirect()->intended('cooperations/approve-list');
     }
 
     public function destroy()
     {
         $id = Input::get('id');
-
         $coop = Cooperation::find($id);
-        $coop->coopItem()->delete();
-        if(empty($coop))
+        if(empty($coop) || empty($id))
         {
             return abort('404');
         }
 
-        $deleted = $coop->delete();
+        if($coop->coop_type=='MOU'){
+            $coop_relation = Cooperation::where('cooperation_id',$coop->id)->get();
+
+            if(isset($coop_relation)){
+                foreach($coop_relation as $coop_addendum){
+                    $coop_adden = Cooperation::where('cooperation_id',$coop_addendum->id)->get();
+
+                    if(!$coop_adden->isEmpty()){
+                        $coop_adden->delete();
+                    }
+                    $coop_addendum->delete();
+                }
+            }
+            $deleted = $coop->delete();
+        }elseif($coop->coop_type=='MOA'){
+            $coop_adden = Cooperation::where('cooperation_id',$coop->id)->get();
+            if(isset($coop_adden)){
+                $coop_adden->coopItem()->delete();
+                $coop_adden->delete();
+            }
+            $coop->coopItem()->delete();
+            $deleted = $coop->delete();
+        }else{
+            $coop->coopItem()->delete();
+            $deleted = $coop->delete();
+        }
+
         if($deleted)
             session()->flash('alert-success', 'Kerjasama berhasil dihapus');
         else
@@ -427,18 +872,21 @@ class CooperationController extends MainController {
     public function edit()
     {
         $input = Input::all();
-        if (! isset($input['id']))
+        $cooperation = Cooperation::find($input['id']);
+        if (! isset($input['id']) || empty($cooperation))
         {
             return abort('404');
         }
 
         array_push($this->css['pages'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/css/datepicker.css');
         array_push($this->css['pages'], 'kartik-v/bootstrap-fileinput/css/fileinput.min.css');
+        array_push($this->css['pages'], 'css/jquery-confirm.min.css');
 
         array_push($this->js['scripts'], 'global/plugins/bower_components/bootstrap-datepicker-vitalets/js/bootstrap-datepicker.js');
         array_push($this->js['scripts'], 'global/plugins/bower_components/jquery-validation/dist/jquery.validate.min.js');
         array_push($this->js['scripts'], 'kartik-v/bootstrap-fileinput/js/fileinput.min.js');
         array_push($this->js['scripts'], 'global/plugins/bower_components/jquery.inputmask/dist/jquery.inputmask.bundle.min.js');
+        array_push($this->js['scripts'], 'js/jquery-confirm.min.js');
 
         View::share('css', $this->css);
         View::share('js', $this->js);
@@ -447,16 +895,57 @@ class CooperationController extends MainController {
         $upd_mode = 'edit';
         $action_url = 'cooperations/edit';
 
-        $cooperation = Cooperation::find($input['id']);
         $cooperation->sign_date = date('d-m-Y', strtotime($cooperation->sign_date));
         $cooperation->end_date = date('d-m-Y', strtotime($cooperation->end_date));
+
+
+        $coop_tree_relations = $this->getCoopRelation($input['id']);
         $coop_relations = Cooperation::where('cooperation_id', $cooperation->id)->get();
         $partners = Partner::all();
         $coop_types = CoopType::all();
+        $coop_items = $cooperation->coopItem()->get();
+        $mou_coops = Cooperation::where('coop_type', 'MOU')->where('status','AC')->with('partner')->get();
+        $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
+        if ($cooperation->coop_type == 'ADDENDUM')
+        {
+            $prev_coop = Cooperation::find($cooperation->cooperation_id);
+        }
+
+        $simsdm = new Simsdm();
 
         $disabled = null;
         if (! $coop_relations->isEmpty())
+        {
             $disabled = "disabled";
+            $is_relation = 'disabled';
+        }
+
+        $isSuper = null;
+
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type)','SAU')){
+            $isSuper=true;
+        }
+
+        $units = [];
+
+        if($isSuper){
+            $units = $simsdm->unitAll();
+            $usu = array("id"=>"","code"=>"USU","name"=>"Universitas Sumatera Utara");
+            array_push($units,$usu);
+        }elseif($user_auth->contains('auth_type','AU')){
+            foreach ($user_auth as $user){
+                $l_units = $simsdm->unitAll();
+
+                foreach ($l_units as $key=>$unit){
+                    if (is_array($l_units) && !in_array($user->unit, $unit)){
+                        unset($l_units[$key]);
+                    }
+                }
+                $units = array_merge($units, $l_units);
+            }
+        }
 
         return view('cooperation.coop-detail', compact(
             'page_title',
@@ -464,9 +953,17 @@ class CooperationController extends MainController {
             'action_url',
             'cooperation',
             'coop_relations',
+            'coop_tree_relations',
             'partners',
             'coop_types',
-            'disabled'
+            'disabled',
+            'units',
+            'isSuper',
+            'coop_items',
+            'mou_coops',
+            'is_relation',
+            'prev_coop',
+            'moa_coops'
         ));
     }
 
@@ -486,19 +983,88 @@ class CooperationController extends MainController {
             $cooperations_mou = Cooperation::where('coop_type','MOU')->get();
             $cooperations = $cooperations->merge($cooperations_mou);
 
-            if($user_auth->contains('auth_type','AP')){
-                foreach ($user_auth as $user_a){
-                    $coop = Cooperation::where('sub_unit',$user_a->unit)->get();
-                    $cooperations = $cooperations->merge($coop);
+        }
+        $data = [];
+        $i = 0;
+        foreach ($cooperations as $cooperation)
+        {
+            $partner = $cooperation->partner()->first();
+            $coop_type = $cooperation->coopType()->first();
+            $status = $cooperation->statusCode()->first();
+
+            if ($cooperation->coop_type == 'MOA' || $cooperation->coop_type == 'SPK')
+            {
+                $mou_coop = Cooperation::find($cooperation->cooperation_id);
+                $cooperation->form_of_coop = $mou_coop->form_of_coop;
+                $partner = $mou_coop->partner()->first();
+            } elseif ($cooperation->coop_type == 'ADDENDUM')
+            {
+                $prev_coop = Cooperation::find($cooperation->cooperation_id);
+                if ($prev_coop->coop_type == 'MOA')
+                {
+                    $mou_coop = Cooperation::find($prev_coop->cooperation_id);
+                    $cooperation->form_of_coop = $mou_coop->form_of_coop;
+                    $partner = $mou_coop->partner()->first();
                 }
             }
+            $data['data'][$i][0] = $cooperation->id;
+            $data['data'][$i][1] = $i + 1;
+            $data['data'][$i][2] = $cooperation->area_of_coop;
+            if(isset($partner)){
+                $data['data'][$i][3] = $partner->name;
+            }else{
+                $data['data'][$i][3] = "";
+            }
+
+            $data['data'][$i][4] = $coop_type->type;
+            $data['data'][$i][5] = $cooperation->form_of_coop;
+            $data['data'][$i][6] = date('d F Y', strtotime($cooperation->end_date));
+            $data['data'][$i][7] = $status->description;
+            if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+                $data['data'][$i][8] = '<a href="cooperations/display?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Lihat"> <button class="btn btn-theme btn-sm rounded coop-view-btn"><i class="fa fa-eye" style="color:white;"></i></button></a>';
+                $data['data'][$i][8].= '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>';
+            }else{
+                $data['data'][$i][8] = '<a href="cooperations/display?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Lihat"> <button class="btn btn-theme btn-sm rounded coop-view-btn"><i class="fa fa-eye" style="color:white;"></i></button></a>';
+                if(!$cooperation->coop_type=='MOU'){
+                    $data['data'][$i][8].= '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>';
+                }
+            }
+            $i++;
         }
-        if (!$user_auth->contains('auth_type','AU') && $user_auth->contains('auth_type','AP')){
+
+        $count_data = count($data);
+        if ($count_data == 0)
+        {
+            $data['data'] = [];
+        } else
+        {
+            $count_data = count($data['data']);
+        }
+        $data['iTotalRecords'] = $data['iTotalDisplayRecords'] = $count_data;
+        $data = json_encode($data, JSON_PRETTY_PRINT);
+
+        return response($data, 200)->header('Content-Type', 'application/json');
+    }
+
+    public function getAjaxCoopSoonEnds()
+    {
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        $cooperations = new Collection();
+
+        $date1 = date('Y-m-d', strtotime('-1 months'));
+        $date2 = date('Y-m-d', strtotime('+2 months'));
+
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+            $cooperations = Cooperation::whereBetween('end_date', [$date1, $date2])->get();
+        }
+
+        if ($user_auth->contains('auth_type','AU')){
             foreach ($user_auth as $user_a){
-                $coop = Cooperation::where('sub_unit',$user_a->unit)->get();
+                $coop = Cooperation::where('unit',$user_a->unit)->whereBetween('end_date', [$date1, $date2])->get();
                 $cooperations = $cooperations->merge($coop);
             }
-            $cooperations_mou = Cooperation::where('coop_type','MOU')->get();
+            $cooperations_mou = Cooperation::where('coop_type','MOU')->whereBetween('end_date', [$date1, $date2])->get();
             $cooperations = $cooperations->merge($cooperations_mou);
         }
 
@@ -523,14 +1089,72 @@ class CooperationController extends MainController {
                     $partner = $mou_coop->partner()->first();
                 }
             }
+
             $data['data'][$i][0] = $cooperation->id;
             $data['data'][$i][1] = $i + 1;
             $data['data'][$i][2] = $cooperation->area_of_coop;
             $data['data'][$i][3] = $partner->name;
             $data['data'][$i][4] = $coop_type->type;
             $data['data'][$i][5] = $cooperation->form_of_coop;
-            $data['data'][$i][6] = date('d-m-Y', strtotime($cooperation->end_date));
+            $data['data'][$i][6] = date('d F Y', strtotime($cooperation->end_date));
+            $data['data'][$i][7] = '<a href="cooperations/display?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Lihat"> <button class="btn btn-theme btn-sm rounded coop-view-btn"><i class="fa fa-eye" style="color:white;"></i></button></a>';
+            $i++;
+        }
 
+        $count_data = count($data);
+        if ($count_data == 0)
+        {
+            $data['data'] = [];
+        } else
+        {
+            $count_data = count($data['data']);
+        }
+        $data['iTotalRecords'] = $data['iTotalDisplayRecords'] = $count_data;
+        $data = json_encode($data, JSON_PRETTY_PRINT);
+
+        return response($data, 200)->header('Content-Type', 'application/json');
+    }
+
+    public function getAjaxCoopApprove()
+    {
+        $simsdm = new Simsdm();
+        $cooperations = Cooperation::where('status','SB')->where('coop_type','!=','MOU')->get();
+
+        $data = [];
+        $i = 0;
+        foreach ($cooperations as $cooperation)
+        {
+            $partner = $cooperation->partner()->first();
+            if ($cooperation->coop_type == 'MOA')
+            {
+                $mou_coop = Cooperation::find($cooperation->cooperation_id);
+                $cooperation->form_of_coop = $mou_coop->form_of_coop;
+                $partner = $mou_coop->partner()->first();
+            } elseif ($cooperation->coop_type == 'ADDENDUM')
+            {
+                $prev_coop = Cooperation::find($cooperation->cooperation_id);
+                if ($prev_coop->coop_type == 'MOA')
+                {
+                    $mou_coop = Cooperation::find($prev_coop->cooperation_id);
+                    $cooperation->form_of_coop = $mou_coop->form_of_coop;
+                    $partner = $mou_coop->partner()->first();
+                }
+            }
+
+            $l_units = $simsdm->unitAll();
+
+            foreach ($l_units as $key=>$un){
+                if (is_array($l_units) && in_array($cooperation->unit, $un)){
+                    $unit = $un['name'];
+                }
+            }
+
+            $data['data'][$i][0] = $i + 1;
+            $data['data'][$i][1] = $cooperation->area_of_coop;
+            $data['data'][$i][2] = $partner->name;
+            $data['data'][$i][3] = $unit;
+            $data['data'][$i][4] = date('d F Y', strtotime($cooperation->end_date));
+            $data['data'][$i][5] = '<a href="approve?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Approve"> <button class="btn btn-theme btn-xs rounded coop-view-btn"><i class="fa fa-check-square-o" style="color:white;"></i></button></a>';
             $i++;
         }
 
@@ -551,12 +1175,13 @@ class CooperationController extends MainController {
     public function downloadDocument()
     {
         $id = Input::get('id');
-        if (is_null($id))
+        $cooperation = Cooperation::find($id);
+
+        if (is_null($id)|| empty($cooperation) || empty($cooperation->file_name_ori))
         {
             return abort('404');
         }
 
-        $cooperation = Cooperation::find($id);
         if (! is_null($cooperation))
         {
             if ($cooperation->coop_type == 'MOU')
@@ -565,6 +1190,9 @@ class CooperationController extends MainController {
             } elseif ($cooperation->coop_type == 'MOA')
             {
                 $path = Storage::url('upload/' . 'MOA/' . $cooperation->id);
+            }elseif ($cooperation->coop_type == 'SPK')
+            {
+                $path = Storage::url('upload/' . 'SPK/' . $cooperation->id);
             }elseif ($cooperation->coop_type == 'ADDENDUM')
             {
                 $path = Storage::url('upload/' . 'ADDENDUM/' . $cooperation->id);
@@ -686,7 +1314,7 @@ class CooperationController extends MainController {
 
     private function moveCorresponding($input)
     {
-        if (isset($input['coop_type']))
+        if (!isset($input['id']))
             $ret = new Cooperation();
         else
             $ret = Cooperation::find($input['id']);
@@ -697,17 +1325,17 @@ class CooperationController extends MainController {
         {
             foreach ($input as $key => $item)
             {
-                if ($key != '_method' && $key != '_token' && $key != 'file_name_ori')
+                if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' && $key!='approve')
                     $ret[$key] = $item;
             }
-        } elseif ($input['coop_type'] == 'MOA')
+        } elseif ($input['coop_type'] == 'MOA' || $input['coop_type'] == 'SPK')
         {
             foreach ($input as $key => $item)
             {
                 if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' &&
                     $key != 'item_name' && $key != 'item_quantity' && $key != 'item_uom' &&
                     $key != 'item_total_amount' && $key != 'item_annotation' &&
-                    $key != 'is_sub_unit'
+                    $key != 'is_sub_unit' && $key!='approve'
                 )
                     $ret[$key] = $item;
             }
@@ -719,7 +1347,7 @@ class CooperationController extends MainController {
                 foreach ($input as $key => $item)
                 {
                     if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' &&
-                        $key != 'addendum_type'
+                        $key != 'addendum_type' && $key!='approve'
                     )
                         $ret[$key] = $item;
                 }
@@ -730,7 +1358,7 @@ class CooperationController extends MainController {
                     if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' &&
                         $key != 'item_name' && $key != 'item_quantity' && $key != 'item_uom' &&
                         $key != 'item_total_amount' && $key != 'item_annotation' &&
-                        $key != 'addendum_type'
+                        $key != 'addendum_type' && $key!='approve'
                     )
                         $ret[$key] = $item;
                 }
@@ -746,7 +1374,7 @@ class CooperationController extends MainController {
         if ($cooperation->coop_type == "MOU")
         {
             $mou_coop = $cooperation; //MOU
-        } elseif ($cooperation->coop_type == "MOA")
+        } elseif ($cooperation->coop_type == "MOA" || $cooperation->coop_type == "SPK")
         {
             $mou_coop = Cooperation::find($cooperation->cooperation_id); //MOU
         } elseif ($cooperation->coop_type == "ADDENDUM")
@@ -763,6 +1391,25 @@ class CooperationController extends MainController {
         $addendum_coops = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $mou_coop->id)->get(); //ADDENDUM MOU
 
         $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+
+        $spk_coops = new Collection();
+        foreach ($user_auth as $user){
+            if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                $spk_coops = Cooperation::where("coop_type", "SPK")->where("cooperation_id", $mou_coop->id)->get(); //SPK
+            }else{
+                $spk_coop = Cooperation::where('coop_type', 'SPK')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
+
+                if($spk_coop){
+                    $merged = $spk_coops->merge($spk_coop);
+                    $spk_coops = $merged;
+                }
+
+                $spk_coop_sub = Cooperation::where('coop_type', 'SPK')->where('sub_unit',$user->sub_unit)->get();
+                if($spk_coop_sub){
+                    $spk_coops->merge($spk_coop_sub);
+                }
+            }
+        }
 
         $moa_coops = new Collection();
         foreach ($user_auth as $user){
@@ -828,6 +1475,15 @@ class CooperationController extends MainController {
             $ret[$i]['coop_type'] = $item->coop_type;
             $i++;
         }
+        foreach ($spk_coops as $item)
+        {
+            $ret[$i]['level'] = 3;
+            $ret[$i]['id'] = $item->id;
+            $ret[$i]['area_of_coop'] = $item->area_of_coop;
+            $ret[$i]['parent_id'] = $item->cooperation_id;
+            $ret[$i]['coop_type'] = $item->coop_type;
+            $i++;
+        }
         foreach ($moa_coops as $item)
         {
             $ret[$i]['level'] = 3;
@@ -848,5 +1504,10 @@ class CooperationController extends MainController {
         }
 
         return $ret;
+    }
+
+    public function test()
+    {
+        echo bcrypt('yeni110394');
     }
 }

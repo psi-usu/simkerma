@@ -14,10 +14,10 @@
 @endphp
 
 <!-- MOA -->
-<div id="MoA" style='display: none !important;'>
+<div id="SPK" style='display: none !important;'>
     <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
         <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
-        <select name="cooperation_id" class="form-control select2" style="width: 100%;" >
+        <select name="cooperation_id" class="form-control select2" style="width: 100%;" required>
             <option value="" disabled selected>-- Pilih MOU berdasarkan Bidang Kerjasama --</option>
             @foreach($mou_coops as $mou_coop)
                 <option value="{{$mou_coop['id']}}"
@@ -67,13 +67,13 @@
     <!-- MOA -->
     <div class="form-group form-group-divider">
         <div class="form-inner">
-            <h4 class="no-margin">Data MOA / Perjanjian Kerja Sama (Mohon Diisi)</h4>
+            <h4 class="no-margin">Data SPK / Surat Perintah Kerjasama (Mohon Diisi)</h4>
         </div>
     </div>
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
-        <label for="area_of_coop" class="control-label">Bidang Kerjasama MoA / Perjanjian Kerjasama</label>
+        <label for="area_of_coop" class="control-label">Bidang Kerjasama SPK / Surat Perintah Kerjasama</label>
         <textarea name="area_of_coop" class="form-control" id="bid_kerma_moa"
-                  placeholder="Bidang Kerjasama MoA / Perjanjian Kerja Sama" >{{$cooperation['area_of_coop']}}</textarea>
+                  placeholder="Bidang Kerjasama SPK / Surat Perintah Kerjasama" required>{{$cooperation['area_of_coop']}}</textarea>
         @if($errors->has('area_of_coop'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('area_of_coop')}}
@@ -83,7 +83,7 @@
     <div class="form-group {{$errors->has('implementation') ? 'has-error' : null}}">
         <label for="implementation" class="control-label">Implementasi</label>
         <textarea name="implementation" class="form-control" id="implementasi" placeholder="implementasi"
-                  >{{$cooperation['implementation']}}</textarea>
+                  required>{{$cooperation['implementation']}}</textarea>
         @if($errors->has('implementation'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('implementation')}}
@@ -95,7 +95,7 @@
     <div class="form-group {{$errors->has('unit') ? 'has-error' : null}} ">
         <label for="unit" class="control-label">Unit yang melakukan kerjasama</label>
         <div>
-            <select name='unit' class="form-control select2 mb-15" >
+            <select name='unit' class="form-control select2 mb-15">
                 <option value="" disabled selected>-- Pilih Unit --</option>
                 @foreach($faculties as $faculty)
                     <option value="{{$faculty['code']}}"
@@ -104,12 +104,10 @@
                     </option>
                 @endforeach
                 @foreach($units as $unit)
-                    @if(!empty($unit['code']))
-                        <option value="{{$unit['code']}}"
-                                {{$cooperation['unit'] == $unit['code'] ? 'selected' : null}}>
-                            {{$unit['name']}}
-                        </option>
-                    @endif
+                    <option value="{{$unit['code']}}"
+                            {{$cooperation['unit'] == $unit['code'] ? 'selected' : null}}>
+                        {{$unit['name']}}
+                    </option>
                 @endforeach
             </select>
             @if($errors->has('unit'))
@@ -124,7 +122,7 @@
         <label for="is_sub_unit">Kerjasama dengan sub unit / program studi </label>
         <div class='ckbox ckbox-theme'>
             <input type='checkbox' id='checkbox-default1'
-                    value='1' name="is_sub_unit"
+                   value='1' name="is_sub_unit"
                     {{$cooperation['sub_unit'] != null ? 'checked' : null}}
                     {{$upd_mode != 'create' ? 'disabled' : null}}
             >
@@ -133,9 +131,9 @@
     </div>
 
     <div class="form-group">
-        <label for="sub_unit" class="control-label">Sub Unit <span class="text-danger"> * Di isi apabila kerjasama dengan sub unit / program studi</span></label>
+        <label for="sub_unit" class="control-label">Sub Unit</label>
         <div>
-            <select name='sub_unit' class="form-control select2 mb-15" >
+            <select name='sub_unit' class="form-control select2 mb-15">
                 @if($upd_mode == 'display')
                     <option value="{{$cooperation['sub_unit']}}" selected>{{$cooperation['sub_unit']}}</option>
                 @endif
@@ -151,7 +149,7 @@
     <div class="form-group {{$errors->has('usu_doc_no') ? 'has-error' : null}}">
         <label for="usu_doc_no" class="control-label">Nomor Dokumen USU</label>
         <input name='usu_doc_no' class="form-control" type="text" placeholder="Nomor Dokumen USU"
-               value="{{$cooperation['usu_doc_no']}}" >
+               value="{{$cooperation['usu_doc_no']}}" required>
         @if($errors->has('usu_doc_no'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('usu_doc_no')}}
@@ -162,25 +160,13 @@
         <label for="partner_doc_no" class="control-label">Nomor Dokumen Instansi Partner</label>
         <input name='partner_doc_no' class="form-control" type="text"
                placeholder="Nomor Dokumen Instansi Partner"
-               value="{{$cooperation['partner_doc_no']}}" >
+               value="{{$cooperation['partner_doc_no']}}" required>
         @if($errors->has('partner_doc_no'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('partner_doc_no')}}
             </label>
         @endif
     </div>
-
-    <div class="form-group {{$errors->has('benefit') ? 'has-error' : null}}">
-        <label for="benefit" class="control-label">Manfaat MoA / Perjanjian Kerja Sama</label>
-        <textarea name="benefit" class="form-control" id="bid_kerma_moa"
-                  placeholder="Manfaat MoA / Perjanjian Kerja Sama" >{{$cooperation['benefit']}}</textarea>
-        @if($errors->has('benefit'))
-            <label class="error" style="display: inline-block;">
-                {{$errors->first('benefit')}}
-            </label>
-        @endif
-    </div>
-
     @if($upd_mode != "display")
         <div class="form-group">
             <a href="#" class="btn btn-theme btn-md rounded table-add" title="Tambah"><i class="fa fa-plus"></i></a>
@@ -258,5 +244,17 @@
                data-inputmask="'alias': 'decimal', 'groupSeparator': ',', 'autoGroup': true, 'rightAlign': false"
                value="{{$cooperation['contract_amount'].".00"}}">
     </div>
-    @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen'])
+    <div class="form-group {{$errors->has('file_name_ori') ? 'has-error' : null}}">
+        <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>
+        @if($disabled == null)
+            <input name="file_name_ori" id="fileinput-moa-doc" type="file" class="file" accept=".pdf">
+            @if($errors->has('file_name_ori'))
+                <label class="error" style="display: inline-block;">
+                    {{$errors->first('file_name_ori')}}
+                </label>
+            @endif
+        @else
+            <a href="{{url('cooperations/download-document?id=' . $cooperation->id)}}" class="btn btn-theme rounded">download</a>
+        @endif
+    </div>
 </div>

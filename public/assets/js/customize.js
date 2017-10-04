@@ -1,19 +1,35 @@
 /**
  * Created by Surya on 29/05/2017.
  */
+
+function notify(message, type){
+    $.notify({
+        message: message
+    },{
+        type: type,
+        placement: {
+            from: "bottom"
+        },
+        animate: {
+            enter: "animated fadeInRight",
+            exit: "animated fadeOutRight"
+        }
+    })
+}
+
 $(document).ready(function () {
     var getUrl = window.location,
         baseUrl = getUrl.protocol + "//" + getUrl.host + "/";
 
     if ($("#coop-list").length) {
-        // var auth = $('#auth').val();
-        var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
-        // if(auth=='SU'){
-        //     var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button> '+
-        //         '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>';
-        // }else{
-        //     var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
-        // }
+        var auth = $('#auth').val();
+        // var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
+        if(auth=='SU'){
+            var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button> '+
+                '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>';
+        }else{
+            var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
+        }
 
         var coopDatatable = $("#coop-list").dataTable({
             autoWidth: false,
@@ -22,7 +38,6 @@ $(document).ready(function () {
             columnDefs: [
                 {
                     orderable: false,
-                    defaultContent: button_action,
                     targets: 7
                 },
                 {
@@ -31,11 +46,11 @@ $(document).ready(function () {
                 },
                 {
                     width: "5%",
-                    targets: 1,
+                    targets: 1
                 },
                 {
-                    width: "10%",
-                    targets: 6,
+                    width: "20%",
+                    targets: 6
                 },
                 {
                     visible: false,
@@ -60,18 +75,201 @@ $(document).ready(function () {
         });
     }
 
-    $(document).on("click", ".coop-view-btn", function (e) {
-        e.preventDefault();
-        var dt_row = $(this).closest("li").data("dt-row");
+    if ($("#coop-list-soon-ends").length) {
+        $("#coop-list-soon-ends").dataTable({
+            autoWidth: false,
+            responsive: true,
+            ajax: baseUrl + 'cooperations/ajaxCoopSoonEnds',
+            columnDefs: [
+                {
+                    orderable: false,
+                    targets: 7
+                },
+                {
+                    className: "dt-center",
+                    targets: [1, 4, 5, 6, 7]
+                },
+                {
+                    width: "5%",
+                    targets: 1,
+                },
+                {
+                    width: "20%",
+                    targets: 6,
+                },
+                {
+                    visible: false,
+                    targets: 0,
+                }
+            ],
+        });
+    }
 
-        if (dt_row >= 0) {
-            var position = dt_row;
-        } else {
-            var target_row = $(this).closest("tr").get(0);
-            var position = coopDatatable.fnGetPosition(target_row);
+    if ($("#coop-approve-list").length) {
+        $("#coop-approve-list").dataTable({
+            autoWidth: false,
+            responsive: true,
+            ajax: baseUrl + 'cooperations/ajaxCoopApprove',
+            columnDefs: [
+                {
+                    orderable: false,
+                    targets: 5
+                },
+                {
+                    className: "dt-center",
+                    targets: [0, 4, 5]
+                },
+                {
+                    width: "5%",
+                    targets: 0,
+                }
+            ],
+        });
+    }
+
+    $(document).on("click", "#tambah_kerma #coop-submit", function (e) {
+        e.preventDefault();
+        $.confirm({
+            title: 'Konfirmasi',
+            content: 'Apakah anda yakin ingin submit data ini? Setelah disubmit, data tidak dapat diubah',
+            type: 'red',
+            typeAnimated: true,
+            buttons: {
+                tryAgain: {
+                    text: 'Ya',
+                    btnClass: 'btn-danger',
+                    action: function(){
+                        var myForm = $('#tambah_kerma');
+                        $("#tambah_kerma").attr("action", baseUrl + "cooperations/create");
+                        myForm.find(':submit').click();
+                    }
+                },
+                close: function () {
+                }
+            }
+        });
+        if ($("#moa-table").length) {
+            $(":input").inputmask()
+            $("#tambah_kerma").validate({
+                rules: {
+                    "item_name[]": {
+                        required: true
+                    },
+                    "item_quantity[]": {
+                        required: true
+                    },
+                    "item_uom[]": {
+                        required: true
+                    },
+                    "item_total_amount[]": {
+                        required: true
+                    },
+                    "item_annotation[]": {
+                        required: true
+                    },
+                },
+                highlight: function (element) {
+                    $(element).parents('.form-group').addClass('has-error has-feedback');
+                },
+                unhighlight: function (element) {
+                    $(element).parents('.form-group').removeClass('has-error');
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
         }
-        var id = coopDatatable.fnGetData(position)[0];
-        window.open(baseUrl + "cooperations/display?id=" + id, "_self");
+        else if ($("#spk-table").length) {
+            $(":input").inputmask()
+            $("#tambah_kerma").validate({
+                rules: {
+                    "item_name[]": {
+                        required: true
+                    },
+                    "item_quantity[]": {
+                        required: true
+                    },
+                    "item_uom[]": {
+                        required: true
+                    },
+                    "item_total_amount[]": {
+                        required: true
+                    },
+                    "item_annotation[]": {
+                        required: true
+                    },
+                },
+                highlight: function (element) {
+                    $(element).parents('.form-group').addClass('has-error has-feedback');
+                },
+                unhighlight: function (element) {
+                    $(element).parents('.form-group').removeClass('has-error');
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+        }
+    });
+
+    $(document).on("click", "#tambah_kerma #coop-temp", function (e) {
+        e.preventDefault();
+        var myForm = $('#tambah_kerma');
+        $("#tambah_kerma").attr("action", baseUrl + "cooperations/create-temp");
+        myForm.find(':submit').click();
+    });
+
+    $(document).on("click", "#tambah_kerma #coop-update", function (e) {
+        e.preventDefault();
+        $.confirm({
+            title: 'Konfirmasi',
+            content: 'Apakah anda yakin ingin submit data ini? Setelah disubmit, data tidak dapat diubah',
+            type: 'red',
+            typeAnimated: true,
+            buttons: {
+                tryAgain: {
+                    text: 'Ya',
+                    btnClass: 'btn-danger',
+                    action: function(){
+                        var myForm = $('#tambah_kerma');
+                        $("#tambah_kerma").attr("action", baseUrl + "cooperations/edit");
+                        myForm.find(':submit').click();
+                    }
+                },
+                close: function () {
+                }
+            }
+        });
+    });
+
+    $(document).on("click", "#tambah_kerma #coop-approve", function (e) {
+        e.preventDefault();
+        $.confirm({
+            title: 'Konfirmasi',
+            content: 'Apakah anda yakin ingin submit data ini? Setelah disubmit, data tidak dapat diubah',
+            type: 'red',
+            typeAnimated: true,
+            buttons: {
+                tryAgain: {
+                    text: 'Ya',
+                    btnClass: 'btn-danger',
+                    action: function(){
+                        var myForm = $('#tambah_kerma');
+                        $("#tambah_kerma").attr("action", baseUrl + "cooperations/edit");
+                        myForm.find(':submit').click();
+                    }
+                },
+                close: function () {
+                }
+            }
+        });
+    });
+
+    $(document).on("click", "#tambah_kerma #coop-Utemp", function (e) {
+        e.preventDefault();
+        var myForm = $('#tambah_kerma');
+        $("#tambah_kerma").attr("action", baseUrl + "cooperations/edit-temp");
+        myForm.find(':submit').click();
     });
 
     if ($("#partner-list").length) {
@@ -138,7 +336,7 @@ $(document).ready(function () {
 
 
     if ($("#unit-list").length) {
-        var unitDatatable = $("#unit-list").dataTable({
+        $("#unit-list").dataTable({
             autoWidth: false,
             responsive: true,
             ajax: baseUrl + 'units/ajax',
@@ -200,13 +398,15 @@ $(document).ready(function () {
     }
 
     if ($("input[name=coop_type]:checked").val() == "MOU") {
-        toggleCoopDetail(true, false, false);
+        toggleCoopDetail(true, false, false, false);
     }
     else if ($("input[name=coop_type]:checked").val() == "MOA") {
-        toggleCoopDetail(false, true, false);
+        toggleCoopDetail(false, true, false, false);
+    }else if($("input[name=coop_type]:checked").val() == "SPK") {
+        toggleCoopDetail(false, false, false, true);
     }
     else {
-        toggleCoopDetail(false, false, true);
+        toggleCoopDetail(false, false, true, false);
     }
 
     if ($("#fileinput-mou-doc").length) {
@@ -240,13 +440,16 @@ $(document).ready(function () {
 
     $("input:radio[name=coop_type]").change(function () {
         if ($('input[name=coop_type]:checked').val() == 'MOU') {
-            toggleCoopDetail(true, false, false);
+            toggleCoopDetail(true, false, false, false);
             refreshMOUData();
         } else if ($('input[name=coop_type]:checked').val() == 'MOA') {
-            toggleCoopDetail(false, true, false);
+            toggleCoopDetail(false, true, false, false);
             refreshMOAData();
+        } else if ($('input[name=coop_type]:checked').val() == 'SPK') {
+            toggleCoopDetail(false, false, false, true);
+            refreshSPKData();
         } else if ($('input[name=coop_type]:checked').val() == 'ADDENDUM') {
-            toggleCoopDetail(false, false, true);
+            toggleCoopDetail(false, false, true, false);
             $("#choose-addendum-type").find("select").val("").change();
             $("#choose-addendum-type").find("select").trigger("chosen: updated");
         }
@@ -257,33 +460,33 @@ $(document).ready(function () {
             $("#choose-mou").fadeIn("slow").find("select").val("").change().attr("disabled", false);
             $("#choose-mou").find("select").trigger("chosen: udpated");
             $("#choose-moa").hide().find("select").attr("disabled", true);
-            toggleCoopDetail(false, false, true);
+            toggleCoopDetail(false, false, true, false);
         } else if ($(this).val() == 'MOA') {
             $("#choose-moa").fadeIn("slow").find("select").val("").change().attr("disabled", false);
             $("#choose-moa").find("select").trigger("chosen: udpated");
             $("#choose-mou").hide().find("select").attr("disabled", true);
-            toggleCoopDetail(false, false, true);
+            toggleCoopDetail(false, false, true, false);
         }
     });
 
     if ($("#choose-addendum-type select[name=addendum_type]").val() != null) {
         if ($("#choose-addendum-type select[name=addendum_type]").val() == 'MOU') {
             $("#choose-mou").fadeIn("slow");
-            toggleCoopDetail(false, false, true);
+            toggleCoopDetail(false, false, true, false);
         } else if ($("#choose-addendum-type select[name=addendum_type]").val() == 'MOA') {
             $("#choose-moa").fadeIn("slow");
-            toggleCoopDetail(false, false, true);
+            toggleCoopDetail(false, false, true, false);
         }
     }
     if ($("#choose-mou select[name=cooperation_id]:visible").val() > 0) {
-        toggleCoopDetail(true, false, true);
+        toggleCoopDetail(true, false, true, false);
     }
     if ($("#choose-moa select[name=cooperation_id]:visible").val() > 0) {
-        toggleCoopDetail(false, true, true);
+        toggleCoopDetail(false, true, true, false);
     }
 
     $("#choose-mou select[name=cooperation_id]").change(function () {
-        toggleCoopDetail(true, false, true);
+        toggleCoopDetail(true, false, true, false);
         refreshMOUData();
         var id = $(this).val();
         $.ajax({
@@ -308,7 +511,7 @@ $(document).ready(function () {
     });
 
     $("#choose-moa select[name=cooperation_id]").change(function () {
-        toggleCoopDetail(false, true, true);
+        toggleCoopDetail(false, true, true, false);
         refreshMOAData();
         var id = $(this).val();
         $.ajax({
@@ -328,6 +531,7 @@ $(document).ready(function () {
                 $("#MoA input[name=end_date]").val(data['end_date']);
                 $("#MoA input[name=usu_doc_no]").val(data['usu_doc_no']);
                 $("#MoA input[name=partner_doc_no]").val(data['partner_doc_no']);
+                $("#MoA textarea[name=benefit]").val(data['benefit']);
                 $("#MoA select[name=unit]").val(data['unit']).change();
                 $("#MoA select[name=unit]").trigger("chosen: updated");
                 $("#MoA input[name=contract_amount]").val(data['contract_amount']);
@@ -360,14 +564,37 @@ $(document).ready(function () {
         });
     });
 
-    function toggleCoopDetail(mou, moa, addendum) {
+    if ($("#choose-moa select[name=cooperation_id]").val() > 0) {
+        var id = $("#choose-moa select[name=cooperation_id]").val();
+
+        $.ajax({
+            url: baseUrl + 'cooperations/ajax/cooperation-detail',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $("#MoA select[name=cooperation_id]").val(data['cooperation_id']).change();
+                $("#MoA select[name=cooperation_id]").trigger("chosen: updated");
+                $("#MoA select[name=cooperation_id]").attr("disabled", true);
+            }
+        });
+    }
+
+    function toggleCoopDetail(mou, moa, addendum, spk) {
         if (mou) {
             $('#MoU').fadeIn('slow').find('input, textarea, select').attr('disabled', false);
         } else {
             $('#MoU').hide().find('input, textarea, select').attr('disabled', true);
         }
         if (moa) {
-            $('#MoA').fadeIn('slow').find('input, textarea, select').attr('disabled', false);
+            $('#MoA').fadeIn('slow');
+            var val = $("#tambah_kerma input[name=approve]").val();
+
+            if(val==""){
+                $('#MoA').find('input, textarea, select').attr('disabled', false);
+            }
+
             $('#MoA').find('input[name^=mou_detail_], textarea[name^=mou_detail_], select[name^=mou_detail_], input[name=contract_amount], input[name^=item_]:hidden').attr('disabled', true);
         } else {
             $('#MoA').hide().find('input, textarea, select').attr('disabled', true);
@@ -380,6 +607,12 @@ $(document).ready(function () {
             $('#choose-addendum-type').hide().find('select').attr('disabled', false);
             $('#choose-mou').hide().find('select').attr('disabled', false);
             $('#choose-moa').hide().find('select').attr('disabled', false);
+        }
+        if (spk) {
+            $('#SPK').fadeIn('slow').find('input, textarea, select').attr('disabled', false);
+            $('#SPK').find('input[name^=mou_detail_], textarea[name^=mou_detail_], select[name^=mou_detail_], input[name=contract_amount], input[name^=item_]:hidden').attr('disabled', true);
+        } else {
+            $('#SPK').hide().find('input, textarea, select').attr('disabled', true);
         }
     }
 
@@ -418,6 +651,29 @@ $(document).ready(function () {
         $(":input").inputmask();
     }
 
+    function refreshSPKData() {
+        $("#SPK select[name=cooperation_id]").val("").change();
+        $("#SPK select[name=cooperation_id]").trigger("chosen: updated");
+
+        $("#SPK input[name^=mou_detail_]").val("");
+
+        $("#SPK textarea[name=area_of_coop]").val("");
+        $("#SPK textarea[name=implementation]").val("");
+        $("#SPK input[name=sign_date]").val("");
+        $("#SPK input[name=end_date]").val("");
+        $("#SPK input[name=usu_doc_no]").val("");
+        $("#SPK input[name=partner_doc_no]").val("");
+        $("#SPK select[name=unit]").val("").change();
+        $("#SPK select[name=unit]").trigger("chosen: updated");
+        $("#SPK input[name=contract_amount]").val(0);
+
+        $("#spk-table").find("tbody tr:visible").detach();
+        var $clone = $("#spk-table").find('tr.hide').clone(true).removeClass('hide table-line');
+        $clone.find("input").attr("disabled", false);
+        $("#spk-table").find('table').append($clone);
+        $(":input").inputmask();
+    }
+
     if ($("input[name=upd_mode]").val() == 'display') {
         $("#tambah_kerma input:visible, #tambah_kerma select:visible, #tambah_kerma textarea:visible").attr("disabled", true);
     }
@@ -435,7 +691,7 @@ $(document).ready(function () {
     });
 
     var i = 0;
-    while (i < 5) {
+    while (i < 10) {
         var element = $("#datepicker");
         if (i > 0) {
             element = $("#datepicker" + i);
@@ -449,6 +705,13 @@ $(document).ready(function () {
         i++;
     }
 
+    if ($(".date-picker").length) {
+        $(".date-picker").datepicker({
+            format: 'dd-mm-yyyy',
+            forceParse: false
+        });
+    }
+
     if ($("#MoA select[name=cooperation_id]").val() > 0) {
         var id = $("#MoA select[name=cooperation_id]").val();
         if (id > 0) {
@@ -456,8 +719,22 @@ $(document).ready(function () {
         }
     }
 
+    if ($("#SPK select[name=cooperation_id]").val() > 0) {
+        var id = $("#SPK select[name=cooperation_id]").val();
+        if (id > 0) {
+            getCoopDetail(id)
+        }
+    }
+
     $("#MoA select[name=cooperation_id]").change(function () {
         var id = $("#MoA select[name=cooperation_id]").val();
+        if (id > 0) {
+            getCoopDetail(id)
+        }
+    });
+
+    $("#SPK select[name=cooperation_id]").change(function () {
+        var id = $("#SPK select[name=cooperation_id]").val();
         if (id > 0) {
             getCoopDetail(id)
         }
@@ -518,6 +795,8 @@ $(document).ready(function () {
             var v_table = $("#moa-table");
         } else if ($("#user-auth-table").length) {
             var v_table = $("#user-auth-table");
+        }else if($("#spk-table").length){
+            var v_table = $("#spk-table");
         }
         var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
         if ($("#moa-table").length) {
@@ -526,39 +805,11 @@ $(document).ready(function () {
         else if ($("#user-auth-table").length) {
             $clone.find("select").attr("disabled", false);
             $clone.find("select").addClass("select2");
+        }else if($("#spk-table").length){
+            $clone.find("input").attr("disabled", false);
         }
         v_table.find('table').append($clone);
-        if ($("#moa-table").length) {
-            $(":input").inputmask()
-            $("#tambah_kerma").validate({
-                rules: {
-                    "item_name[]": {
-                        required: true
-                    },
-                    "item_quantity[]": {
-                        required: true
-                    },
-                    "item_uom[]": {
-                        required: true
-                    },
-                    "item_total_amount[]": {
-                        required: true
-                    },
-                    "item_annotation[]": {
-                        required: true
-                    },
-                },
-                highlight: function (element) {
-                    $(element).parents('.form-group').addClass('has-error has-feedback');
-                },
-                unhighlight: function (element) {
-                    $(element).parents('.form-group').removeClass('has-error');
-                },
-                submitHandler: function (form) {
-                    form.submit();
-                }
-            });
-        } else if ($("#user-auth-table").length) {
+        if ($("#user-auth-table").length) {
             $(".select2").select2();
         }
     });

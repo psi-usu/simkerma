@@ -32,9 +32,19 @@ class Cooperation extends Model {
         return $this->hasMany(CoopItem::class);
     }
 
+    public function approval()
+    {
+        return $this->hasMany(Approval::class);
+    }
+
     public function coopType()
     {
         return $this->hasOne(CoopType::class, 'type', 'coop_type');
+    }
+
+    public function statusCode()
+    {
+        return $this->hasOne(StatusCode::class, 'code', 'status');
     }
 
     public function partner()

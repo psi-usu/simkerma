@@ -15,14 +15,10 @@ class MasterDataSeed extends Seeder {
             'description' => 'Super User',
             'created_by'  => 'seeder'
         ]);
+
         \App\Auth::create([
             'type'        => 'AU',
             'description' => 'Admin Unit',
-            'created_by'  => 'seeder'
-        ]);
-        \App\Auth::create([
-            'type'        => 'AP',
-            'description' => 'Admin Prodi',
             'created_by'  => 'seeder'
         ]);
 

@@ -108,7 +108,6 @@
                                                         @if($authentication=='SAU' || $authentication=='SU')
                                                             <option value="AU" {{$item['auth_type'] == 'AU' ? 'selected' : null}}>Admin Unit</option>
                                                         @endif
-                                                        <option value="AP" {{$item['auth_type'] == 'AP' ? 'selected' : null}}>Admin Prodi</option>
                                                     </select>
                                                 </td>
                                                 <td>
@@ -144,7 +143,6 @@
                                                     @if($authentication=='SU' || $authentication=='SAU')
                                                         <option value="AU">Admin Unit</option>
                                                     @endif
-                                                    <option value="AP">Admin Prodi</option>
                                                 </select>
                                             </td>
                                             <td>

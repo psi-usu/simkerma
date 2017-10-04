@@ -48,7 +48,7 @@ class UserController extends MainController {
         $page_title = 'User';
 
         $auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
-        if($auth->contains('unit',NULL) && $auth->contains('auth_type','AP')){
+        if($auth->contains('unit',NULL)){
             return abort('403');
         }
 
@@ -140,7 +140,7 @@ class UserController extends MainController {
             $authentication = 'SAU';
         } elseif($user_authentication->contains('auth_type','AU')){
             $authentication = 'AU';
-        }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
+        }elseif(!$user_authentication->contains('auth_type','AU')){
             return abort('404');
         }
 
@@ -239,7 +239,7 @@ class UserController extends MainController {
             $authentication = 'SAU';
         } elseif($user_authentication->contains('auth_type','AU')){
             $authentication = 'AU';
-        }elseif(!$user_authentication->contains('auth_type','AU') && $user_authentication->contains('auth_type','AP')){
+        }elseif(!$user_authentication->contains('auth_type','AU')){
             return abort('404');
         }
 
