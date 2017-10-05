@@ -244,17 +244,9 @@
                data-inputmask="'alias': 'decimal', 'groupSeparator': ',', 'autoGroup': true, 'rightAlign': false"
                value="{{$cooperation['contract_amount'].".00"}}">
     </div>
-    <div class="form-group {{$errors->has('file_name_ori') ? 'has-error' : null}}">
-        <label for="file_name_ori" class="control-label col-md-12">Dokumen</label>
-        @if($disabled == null)
-            <input name="file_name_ori" id="fileinput-moa-doc" type="file" class="file" accept=".pdf">
-            @if($errors->has('file_name_ori'))
-                <label class="error" style="display: inline-block;">
-                    {{$errors->first('file_name_ori')}}
-                </label>
-            @endif
-        @else
-            <a href="{{url('cooperations/download-document?id=' . $cooperation->id)}}" class="btn btn-theme rounded">download</a>
-        @endif
-    </div>
+    @if($upd_mode=='create')
+        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Saat addendum, kosongkan apabila file yang digunakan sama dengan MOA'])
+    @elseif($upd_mode=='edit' || $upd_mode=='display'))
+        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Kosongkan apabila file tidak berubah'])
+    @endif
 </div>

@@ -1,5 +1,5 @@
 <div class="form-group {{$errors->has($passing_variable) ? 'has-error' : null}}">
-    <label for="{{$passing_variable}}" class="control-label">{{$passing_description}}<span class="text-danger"> * Saat Addendum MOA atau edit kerjasama, kosongkan apabila file tidak berubah</span>
+    <label for="{{$passing_variable}}" class="control-label">{{$passing_description}}<span class="text-danger"> {{$passing_error}}</span>
     </label>
     <div class="clearfix"></div>
     @if($disabled == null)
@@ -15,6 +15,5 @@
         @else
             <a class="btn btn-theme rounded btn-slideright" disabled>Download</a><p class="text-danger"> File belum diupload</p>
         @endif
-
     @endif
 </div>

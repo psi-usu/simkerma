@@ -54,8 +54,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-            $login->payload->identity = env('LOGIN_USERNAME');
-//            $login->payload->identity = env('USERNAME_LOGIN');
+//            $login->payload->identity = env('LOGIN_USERNAME');
+            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -168,18 +168,13 @@ class CooperationController extends MainController {
         $moa_coops = new Collection();
         foreach ($user_auth as $user){
             if($user->auth_type=='SU' || $user->auth_type=='SAU'){
-                $moa_coops = Cooperation::where('coop_type', 'MOA')->get();
+                $moa_coops = Cooperation::where('coop_type', 'MOA')->where('status','AC')->get();
             }else{
-                $moa_coop = Cooperation::where('coop_type', 'MOA')->where('unit',$user->unit)->get();
+                $moa_coop = Cooperation::where('coop_type', 'MOA')->where('unit',$user->unit)->where('status','AC')->get();
 
                 if($moa_coop){
                     $merged = $moa_coops->merge($moa_coop);
                     $moa_coops = $merged;
-                }
-
-                $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->sub_unit)->get();
-                if($moa_coop_sub){
-                    $moa_coops->merge($moa_coop_sub);
                 }
             }
         }
@@ -244,7 +239,12 @@ class CooperationController extends MainController {
             $cooperation['sign_date'] = date('Y-m-d', strtotime($date1));
             $date2 = str_replace('/', '-', $cooperation['end_date']);
             $cooperation['end_date'] = date('Y-m-d', strtotime($date2));
-            $cooperation->status = 'SB';
+            if($this->isAdmin($this->user_info['username'])){
+                $cooperation->status = 'AC';
+            }else{
+                $cooperation->status = 'SB';
+            }
+
             $cooperation->contract_amount = 0;
 
             if ($cooperation->coop_type == 'ADDENDUM')
@@ -260,7 +260,7 @@ class CooperationController extends MainController {
                     foreach ($input['item_name'] as $key => $item)
                     {
                         $coop_item = new CoopItem();
-                        $coop_item->item = $key;
+                        $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
                         $coop_item->item_quantity = $input['item_quantity'][$key];
@@ -327,7 +327,7 @@ class CooperationController extends MainController {
 
         $request->session()->flash('alert-success', 'Kerjasama berhasil dibuat');
 
-        return redirect()->intended('/');
+        return redirect()->intended('/cooperations');
     }
 
     public function storeTemp(Request $request)
@@ -366,7 +366,7 @@ class CooperationController extends MainController {
                             $coop_item = new CoopItem();
                         }
 
-                        $coop_item->item = $key;
+                        $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
                         $coop_item->item_quantity = $input['item_quantity'][$key];
@@ -436,7 +436,7 @@ class CooperationController extends MainController {
         });
         $request->session()->flash('alert-success', 'Kerjasama berhasil disimpan sementara');
 
-        return redirect()->intended('/');
+        return redirect()->intended('/cooperations');
     }
 
     public function update(StoreCooperationRequest $request)
@@ -444,7 +444,6 @@ class CooperationController extends MainController {
         $this->authorize('update', Cooperation::class);
 
         $input = Input::all();
-        dd($input);
 
         DB::transaction(function () use ($input, $request)
         {
@@ -452,7 +451,11 @@ class CooperationController extends MainController {
             $cooperation['updated_by'] = Auth::user()->username;
             $cooperation['sign_date'] = date('Y-m-d', strtotime($cooperation['sign_date']));
             $cooperation['end_date'] = date('Y-m-d', strtotime($cooperation['end_date']));
-            $cooperation['status'] = 'SB';
+            if($this->isAdmin($this->user_info['username'])){
+                $cooperation['status'] = 'AC';
+            }else{
+                $cooperation['status'] = 'SB';
+            }
 
             $cooperation->contract_amount = 0;
 
@@ -477,7 +480,7 @@ class CooperationController extends MainController {
                             $coop_item = new CoopItem();
                         }
 
-                        $coop_item->item = $key;
+                        $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
                         $coop_item->item_quantity = $input['item_quantity'][$key];
@@ -518,7 +521,7 @@ class CooperationController extends MainController {
 
         $request->session()->flash('alert-success', 'Kerjasama berhasil di-update');
 
-        return redirect()->intended('/');
+        return redirect()->intended('/cooperations');
     }
 
     public function updateTemp(Request $request)
@@ -555,7 +558,7 @@ class CooperationController extends MainController {
                             $coop_item = new CoopItem();
                         }
 
-                        $coop_item->item = $key;
+                        $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
                         $coop_item->item_quantity = $input['item_quantity'][$key];
@@ -638,7 +641,7 @@ class CooperationController extends MainController {
 
         $request->session()->flash('alert-success', 'Kerjasama berhasil di-update');
 
-        return redirect()->intended('/');
+        return redirect()->intended('/cooperations');
     }
 
     public function display()
@@ -666,6 +669,22 @@ class CooperationController extends MainController {
         $action_url = 'cooperations/display';
         $disabled = 'disabled';
         $coop_relations = Cooperation::where('cooperation_id', $cooperation->id)->get();
+
+        if($this->isAdmin($this->user_info['username'])){
+            $edit = true;
+        }else{
+            if($cooperation->coop_type=='MOU'){
+                $edit = false;
+            }else{
+                $coop_status = Cooperation::where('cooperation_id', $cooperation->id)->where('status','RJ')->get();
+                if($coop_status->isEmpty()){
+                    $edit = true;
+                    $rj_note = Approval::where('cooperation_id',$cooperation->id)->orderBy('id','desc')->first();
+                }else{
+                    $edit = false;
+                }
+            }
+        }
 
         if (! $coop_relations->isEmpty())
         {
@@ -715,7 +734,9 @@ class CooperationController extends MainController {
             'coop_tree_relations',
             'disabled',
             'isSuper',
-            'is_relation'
+            'is_relation',
+            'edit',
+            'rj_note'
         ));
     }
 
@@ -741,7 +762,7 @@ class CooperationController extends MainController {
         View::share('css', $this->css);
         View::share('js', $this->js);
 
-        $page_title = "Detail Kerjasama";
+        $page_title = "Approve Kerjasama";
         $upd_mode = 'approve';
         $action_url = 'cooperations/approve';
         $disabled = 'disabled';
@@ -866,7 +887,7 @@ class CooperationController extends MainController {
         else
             session()->flash('alert-danger', 'Terjadi kesalahan pada sistem, Kerjasama gagal dihapus');
 
-        return redirect()->intended('/');
+        return redirect()->intended('/cooperations');
     }
 
     public function edit()
@@ -980,7 +1001,7 @@ class CooperationController extends MainController {
                 $coop = Cooperation::where('unit',$user_a->unit)->get();
                 $cooperations = $cooperations->merge($coop);
             }
-            $cooperations_mou = Cooperation::where('coop_type','MOU')->get();
+            $cooperations_mou = Cooperation::where('coop_type','MOU')->where('status','AC')->get();
             $cooperations = $cooperations->merge($cooperations_mou);
 
         }
@@ -1508,6 +1529,6 @@ class CooperationController extends MainController {
 
     public function test()
     {
-        echo bcrypt('yeni110394');
+        echo bcrypt('erty975');
     }
 }

@@ -44,10 +44,6 @@ class AuthServiceProvider extends ServiceProvider {
                 UserAuth::where('username', $user->username)
                     ->where('auth_type', 'SAU')
                     ->exists()
-                ||
-                UserAuth::where('username', $user->username)
-                    ->where('auth_type', 'AU')
-                    ->exists()
             );
 //            return (Auths::where('user_id', $user->id)->where('auth_object_ref_id', '1')->exists() ||
 //                Auths::where('user_id', $user->id)->where('auth_object_ref_id', '2')->exists());

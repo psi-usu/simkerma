@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Simsdm;
+use App\UserAuth;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use View;
@@ -147,13 +149,37 @@ class MainController extends Controller {
         {
             $simsdm = new Simsdm();
             $user = $simsdm->getEmployee(Auth::user()->username);
-            $this->user_info = [
-                'username' => Auth::user()->username,
-                'full_name' => $user->full_name,
-                'photo' => $user->photo,
-//                'email'     => $user->email,
-            ];
+            if (isset($user))
+                $this->user_info = [
+                    'username'  => Auth::user()->username,
+                    'full_name' => $user->full_name,
+                    'photo'     => $user->photo
+                ];
+            }
+            
         }
         View::share('user_info', $this->user_info);
+    }
+
+    public function isAdmin($username)
+    {
+        $check=false;
+        $user = UserAuth::where('username',$username)->where('auth_type','SU')->orWhere('auth_type','SAU')->first();
+
+        if(isset($user)){
+            $check=true;
+        }
+        return $check;
+    }
+
+    public function isUnit($username)
+    {
+        $check=false;
+        $user = UserAuth::where('username',$username)->where('auth_type','SU')->orWhere('auth_type','AU')->first();
+
+        if(isset($user)){
+            $check=true;
+        }
+        return $check;
     }
 }

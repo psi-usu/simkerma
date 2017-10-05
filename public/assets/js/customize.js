@@ -593,6 +593,8 @@ $(document).ready(function () {
 
             if(val==""){
                 $('#MoA').find('input, textarea, select').attr('disabled', false);
+            }else{
+                $('#MoA').find('input, textarea, select').attr('disabled', true);
             }
 
             $('#MoA').find('input[name^=mou_detail_], textarea[name^=mou_detail_], select[name^=mou_detail_], input[name=contract_amount], input[name^=item_]:hidden').attr('disabled', true);

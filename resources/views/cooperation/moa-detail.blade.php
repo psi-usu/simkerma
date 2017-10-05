@@ -258,5 +258,9 @@
                data-inputmask="'alias': 'decimal', 'groupSeparator': ',', 'autoGroup': true, 'rightAlign': false"
                value="{{$cooperation['contract_amount'].".00"}}">
     </div>
-    @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen'])
+    @if($upd_mode=='create')
+        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Saat addendum, kosongkan apabila file yang digunakan sama dengan MOA'])
+    @elseif($upd_mode=='edit' || $upd_mode=='display')
+        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Kosongkan apabila file tidak berubah'])
+    @endif
 </div>

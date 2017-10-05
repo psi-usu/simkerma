@@ -49,6 +49,10 @@
         $mou_coops = new \App\Cooperation();
     if(!isset($approve))
         $approve = "";
+    if(!isset($edit))
+        $edit = "";
+    if(!isset($rj_note))
+        $rj_note = "";
     if(!isset($moa_coops))
             $moa_coops = new \App\Cooperation();
     if(!isset($prev_coop))
@@ -61,7 +65,7 @@
 
         <!-- Start page header -->
         <div id="tour-11" class="header-content">
-            <h2><i class="fa fa-handshake-o"></i>Kerjasama</h2>
+            <h2><i class="fa fa-handshake-o"></i>{{$page_title}}</h2>
             <div class="breadcrumb-wrapper hidden-xs">
                 <span class="label">Direktori Anda:</span>
                 <ol class="breadcrumb">
@@ -95,14 +99,19 @@
                         </div><!-- /.panel-heading -->
                         <div class="panel-body">
                             @if($is_relation != null)
-                                @include("cooperation.coop-relation-danger")
+                                @include("cooperation.coop-relation-danger",['danger' => 'Kerjasama tidak dapat diubah, karena telah terdapat relasi pada kerjasama ini'])
+                            @endif
+                            @if(!empty($rj_note))
+                                @include("cooperation.coop-relation-danger",['danger' => $rj_note->note])
                             @endif
                             @if($upd_mode == 'display' && $is_relation==null)
-                                <div class="form-group">
-                                    <a href="{{url('cooperations/edit?id=' . $cooperation->id)}}"
-                                       class="btn btn-success rounded">Ubah</a>
-                                    <a href="{{url('/')}}" class="btn btn-danger rounded">Batal</a>
-                                </div>
+                                @if($edit)
+                                    <div class="form-group">
+                                        <a href="{{url('cooperations/edit?id=' . $cooperation->id)}}"
+                                           class="btn btn-success rounded">Ubah</a>
+                                        <a href="{{url('/')}}" class="btn btn-danger rounded">Batal</a>
+                                    </div>
+                                @endif
                             @endif
                             <form id='tambah_kerma'  method="post" enctype="multipart/form-data">
                                 {{csrf_field()}}

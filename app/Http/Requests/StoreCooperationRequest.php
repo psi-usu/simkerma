@@ -66,12 +66,16 @@ class StoreCooperationRequest extends FormRequest {
             $rules = array_add($rules, 'form_of_coop', 'required');
         }
 
+
         if ($this->input('coop_type') == 'MOA' || $this->input('coop_type') == 'MOU' || $this->input('coop_type') == 'SPK' ){
             $rules = array_add($rules, 'coop_type', 'required|max:10');
-            $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
         }else{
             $rules = array_add($rules, 'coop_type', 'max:10');
             $rules = array_add($rules, 'file_name_ori', 'mimes:pdf');
+        }
+
+        if(!$this->input('cooperation_id')){
+            $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
         }
 
         return $rules;
