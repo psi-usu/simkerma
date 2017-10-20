@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\IsAuth;
+use App\Http\Middleware\IsOperator;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel

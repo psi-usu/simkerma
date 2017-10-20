@@ -900,8 +900,8 @@ $(document).ready(function () {
     $('#report_coop').on('submit', function (e) {
         e.preventDefault();
         var coop_type = $('#coop_type').val();
-        var sign_date = $('#sign_date').val();
-        var end_date = $('#end_date').val();
+        var sign_date1 = $('#sign_date1').val();
+        var sign_date2 = $('#sign_date2').val();
         var partner = $('#partner').val();
         $('.loading').fadeIn('slow');
         $('#result').fadeOut('slow');
@@ -952,7 +952,7 @@ $(document).ready(function () {
                 $("#table-report").html(table);
                 $("#table-report").dataTable();
 
-                $("#btn-download").attr("href", baseUrl + "report/downloadExcel?coop_type=" + coop_type + "&sign_date=" + sign_date + "&end_date=" + end_date +"&partner=" +partner);
+                $("#btn-download").attr("href", baseUrl + "report/downloadExcel?coop_type=" + coop_type + "&sign_date1=" + sign_date1 + "&sign_date2=" + sign_date2 +"&partner=" +partner);
             },
             error:function(data){
                 alert(data.status);

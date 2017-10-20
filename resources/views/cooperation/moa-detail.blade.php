@@ -1,8 +1,6 @@
 @php
     if(!isset($mou_coops))
         $mou_coops = new App\Cooperation();
-    if(!isset($faculties))
-        $faculties = [];
     if(!isset($units))
         $units = [];
     if(!isset($disabled))
@@ -97,12 +95,6 @@
         <div>
             <select name='unit' class="form-control select2 mb-15" >
                 <option value="" disabled selected>-- Pilih Unit --</option>
-                @foreach($faculties as $faculty)
-                    <option value="{{$faculty['code']}}"
-                            {{$cooperation['unit'] == $faculty['code'] ? 'selected' : null}}>
-                        {{$faculty['name']}}
-                    </option>
-                @endforeach
                 @foreach($units as $unit)
                     @if(!empty($unit['code']))
                         <option value="{{$unit['code']}}"

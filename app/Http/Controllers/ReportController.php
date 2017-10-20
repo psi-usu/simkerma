@@ -108,44 +108,48 @@ class ReportController extends MainController
         $data = [];
         $i = 0;
 
-        $request->sign_date = explode(' - ',$request->sign_date);
-
-        $date1 = str_replace('/', '-', $request->sign_date[0]);
+        $date1 = str_replace('/', '-', $request->sign_date1);
         $sign_date1 = date('Y-m-d', strtotime($date1));
 
-        $date2 = str_replace('/', '-', $request->sign_date[1]);
+        $date2 = str_replace('/', '-', $request->sign_date2);
         $sign_date2 = date('Y-m-d', strtotime($date2));
-
-        $request->end_date = explode(' - ',$request->end_date);
-        $end_date1 = date('Y-m-d', strtotime($request->end_date[0]));
-        $end_date2 = date('Y-m-d', strtotime($request->end_date[1]));
 
         if($request->coop_type=='all' && $request->partner=='all')
         {
-            $coops  = Cooperation::whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])->get();
+            $coops  = Cooperation::where('status','AC')->whereBetween('sign_date', [$sign_date1, $sign_date2])->take(5)->get();
         }elseif ($request->coop_type=='all' && $request->partner!= 'all'){
-            $coops  = Cooperation::where('partner_id', $request->partner)->whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
+            $coops  = Cooperation::where('status','AC')->where('partner_id', $request->partner)->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }elseif ($request->coop_type!='all' && $request->partner == 'all'){
-            $coops  = Cooperation::where('coop_type', $request->coop_type)->whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
+            $coops  = Cooperation::where('status','AC')->where('coop_type', $request->coop_type)->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }
         else{
-            $coops  = Cooperation::where('partner_id', $request->partner)->where('coop_type', $request->coop_type)->whereBetween('sign_date', [$sign_date1, $sign_date2])
-                ->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
+            $coops  = Cooperation::where('status','AC')->where('partner_id', $request->partner)->where('coop_type', $request->coop_type)->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }
 
         foreach ($coops as $coop){
             $partner = $coop->partner()->first();
 
-            if ($coop->coop_type == 'MOA')
+            if ($coop->coop_type == 'MOA' || $coop->coop_type == 'SPK')
             {
                 $mou_coop = Cooperation::find($coop->cooperation_id);
-                $partner = $mou_coop->partner()->first();
+                if(!$mou_coop){
+                    $partner = "";
+                }else{
+                    $partner = $mou_coop->partner()->first();
+                }
             }
 
-            $unit = null;
+            if($coop->coop_type == 'ADDENDUM'){
+                $moa_coop = Cooperation::find($coop->cooperation_id);
+                $mou_coop = Cooperation::find($moa_coop->cooperation_id);
+                if(!$mou_coop){
+                    $partner = "";
+                }else{
+                    $partner = $mou_coop->partner()->first();
+                }
+            }
+
+            $unit = "";
             foreach ($simsdm->unitAll() as $units){
                 if($units['code']==$coop->unit){
                     $unit = $units['name'];
@@ -153,7 +157,11 @@ class ReportController extends MainController
             }
 
             $data[$i]['no'] = $i + 1;
-            $data[$i]['partner'] = $partner->name;
+            if(!empty($partner)){
+                $data[$i]['partner']= $partner->name;
+            }else{
+                $data[$i]['partner']= "";
+            }
             $data[$i]['coop_type'] = $coop->coop_type;
             $data[$i]['area_of_coop'] = $coop->area_of_coop;
             $data[$i]['unit'] = $unit;
@@ -172,46 +180,44 @@ class ReportController extends MainController
         $data = [];
         $i = 0;
 
-        $sign_date = explode(' - ',Input::get('sign_date'));
-
-        $date1 = str_replace('/', '-', $sign_date[0]);
+        $date1 = str_replace('/', '-', Input::get('sign_date1'));
         $sign_date1 = date('Y-m-d', strtotime($date1));
-        $date2 = str_replace('/', '-', $sign_date[1]);
+        $date2 = str_replace('/', '-', Input::get('sign_date2'));
         $sign_date2 = date('Y-m-d', strtotime($date2));
 
-        $end_date = explode(' - ', Input::get('end_date'));
-
-        $date3 = str_replace('/', '-', $end_date[0]);
-        $end_date1 = date('Y-m-d', strtotime($date3));
-        $date4 = str_replace('/', '-', $end_date[1]);
-        $end_date2 = date('Y-m-d', strtotime($date4));
-
-        if(Input::get('coop_type')=='all' && Input::get('partner')=='all')
-        {
-            $coops  = Cooperation::whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])->get();
+        if(Input::get('coop_type')=='all' && Input::get('partner')=='all'){
+            $coops  = Cooperation::where('status','AC')->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }elseif (Input::get('coop_type')=='all' && Input::get('partner')!='all'){
-            $coops  = Cooperation::where('partner_id',Input::get('partner'))->whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
+            $coops  = Cooperation::where('status','AC')->where('partner_id',Input::get('partner'))->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }elseif (Input::get('coop_type')!='all' && Input::get('partner')=='all'){
-            $coops  = Cooperation::where('coop_type', Input::get('coop_type'))->whereBetween('sign_date', [$sign_date1, $sign_date2])->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
-        }
-        else{
-            $coops  = Cooperation::where('partner_id', Input::get('partner'))->where('coop_type', Input::get('coop_type'))->whereBetween('sign_date', [$sign_date1, $sign_date2])
-                ->OrwhereBetween('end_date', [$end_date1, $end_date2])
-                ->get();
+            $coops  = Cooperation::where('status','AC')->where('coop_type', Input::get('coop_type'))->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
+        } else{
+            $coops  = Cooperation::where('status','AC')->where('partner_id', Input::get('partner'))->where('coop_type', Input::get('coop_type'))->whereBetween('sign_date', [$sign_date1, $sign_date2])->get();
         }
 
         foreach ($coops as $coop){
             $partner = $coop->partner()->first();
 
-            if ($coop->coop_type == 'MOA')
-            {
+            if ($coop->coop_type == 'MOA' || $coop->coop_type == 'SPK'){
                 $mou_coop = Cooperation::find($coop->cooperation_id);
-                $partner = $mou_coop->partner()->first();
+                if(!$mou_coop){
+                    $partner = "";
+                }else{
+                    $partner = $mou_coop->partner()->first();
+                }
             }
 
-            $unit = null;
+            if($coop->coop_type == 'ADDENDUM'){
+                $moa_coop = Cooperation::find($coop->cooperation_id);
+                $mou_coop = Cooperation::find($moa_coop->cooperation_id);
+                if(!$mou_coop){
+                    $partner = "";
+                }else{
+                    $partner = $mou_coop->partner()->first();
+                }
+            }
+
+            $unit = "";
             foreach ($simsdm->unitAll() as $units){
                 if($units['code']==$coop->unit){
                     $unit = $units['name'];
@@ -219,13 +225,17 @@ class ReportController extends MainController
             }
 
             $data[$i]['No'] = $i + 1;
-            $data[$i]['Partner'] = $partner->name;
+            if(!empty($partner)){
+                $data[$i]['Partner']= $partner->name;
+            }else{
+                $data[$i]['Partner']= "";
+            }
             $data[$i]['Jenis Kerja Sama'] = $coop->coop_type;
             $data[$i]['Bidang Kerjasama'] = $coop->area_of_coop;
             $data[$i]['Unit'] = $unit;
             $data[$i]['Tanggal Tanda Tangan'] = date('d-m-Y', strtotime($coop->sign_date));
             $data[$i]['Tanggal Berakhir Kerjasama'] = date('d-m-Y', strtotime($coop->end_date));
-            if($coop)
+
             $i++;
         }
 

@@ -62,7 +62,6 @@
 @section('content')
     <!-- START @PAGE CONTENT -->
     <section id="page-content">
-
         <!-- Start page header -->
         <div id="tour-11" class="header-content">
             <h2><i class="fa fa-handshake-o"></i>{{$page_title}}</h2>

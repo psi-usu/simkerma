@@ -57,16 +57,18 @@
                 </div><!-- /.panel-heading -->
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-12">
-                            <div class="pull-left">
-                                <a href="{{url('cooperations/create')}}" class="btn btn-theme rounded"
-                                   data-toggle="tooltip" data-placement="top" title="Tambah">
-                                    <i class="fa fa-plus"></i> Tambah Kerjasama
-                                </a>
+                        @if($isOperator)
+                            <div class="col-md-12">
+                                <div class="pull-left">
+                                    <a href="{{url('cooperations/create')}}" class="btn btn-theme rounded"
+                                       data-toggle="tooltip" data-placement="top" title="Tambah">
+                                        <i class="fa fa-plus"></i> Tambah Kerjasama
+                                    </a>
+                                </div>
+                                <div class="clearfix"></div>
+                                <hr>
                             </div>
-                            <div class="clearfix"></div>
-                            <hr>
-                        </div>
+                        @endif
                         <div class="col-md-12">
                             <div class="table-responsive mb-20">
                                 <input type="hidden" id="auth" value="{{$auth}}">

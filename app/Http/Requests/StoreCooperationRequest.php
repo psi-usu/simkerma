@@ -74,8 +74,13 @@ class StoreCooperationRequest extends FormRequest {
             $rules = array_add($rules, 'file_name_ori', 'mimes:pdf');
         }
 
-        if(!$this->input('cooperation_id')){
+        if(!$this->input('id')){
             $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
+        }else{
+            $cooperation = Cooperation::find($this->input('id'));
+            if(empty($cooperation->file_name_ori)){
+                $rules = array_add($rules, 'file_name_ori', 'required|mimes:pdf');
+            }
         }
 
         return $rules;
@@ -152,30 +157,31 @@ class StoreCooperationRequest extends FormRequest {
 
                 return $ret;
             }
-        }
 
-        if($this->input('coop_type')== 'MOU'){
-            if($this->input('partner_id')==null){
-                $partner = 0;
-            }else{
-                $partner = $this->input('partner_id');
-            }
+        }else{
+            if($this->input('coop_type')== 'MOU'){
+                if($this->input('partner_id')==null){
+                    $partner = 0;
+                }else{
+                    $partner = $this->input('partner_id');
+                }
 
-            $coop_partner = Cooperation::where('partner_id', $partner)->where('deleted_at',null)->get();
+                $coop_partner = Cooperation::where('partner_id', $partner)->where('deleted_at',null)->get();
 
-            if (!$coop_partner->isEmpty())
-            {
-                $ret[] = 'Kerjasama dengan partner ini sudah ada!';
+                if (!$coop_partner->isEmpty())
+                {
+                    $ret[] = 'Kerjasama dengan partner ini sudah ada!';
 
-                return $ret;
-            }
+                    return $ret;
+                }
 
-            $UserAuth = new UserAuth();
-            $user = Auth::user();
-            if (!$UserAuth->isSuperUser($user) && !$UserAuth->isSuperAdminUnit($user)){
-                $ret[] = 'Anda tidak mempunyai hak akses untuk membuat kerjasama MOU ini';
+                $UserAuth = new UserAuth();
+                $user = Auth::user();
+                if (!$UserAuth->isSuperUser($user) && !$UserAuth->isSuperAdminUnit($user)){
+                    $ret[] = 'Anda tidak mempunyai hak akses untuk membuat kerjasama MOU ini';
 
-                return $ret;
+                    return $ret;
+                }
             }
         }
 

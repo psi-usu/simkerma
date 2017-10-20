@@ -149,6 +149,7 @@ class MainController extends Controller {
         {
             $simsdm = new Simsdm();
             $user = $simsdm->getEmployee(Auth::user()->username);
+
             if (isset($user)){
                 $this->user_info = [
                     'username'  => Auth::user()->username,
@@ -166,6 +167,17 @@ class MainController extends Controller {
         $user = UserAuth::where('username',$username)->where('auth_type','SU')->orWhere('auth_type','SAU')->first();
 
         if(isset($user)){
+            $check=true;
+        }
+        return $check;
+    }
+
+    public function isOthers($username)
+    {
+        $check=false;
+        $user = UserAuth::where('username',$username)->first();
+
+        if(empty($user)){
             $check=true;
         }
         return $check;

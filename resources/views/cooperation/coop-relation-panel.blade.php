@@ -24,7 +24,6 @@
                         <!-- MOU -->
                         @foreach($coop_tree_relations as $coop_relation)
                             @if($coop_relation['level'] == 1)
-
                                 <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/display?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id']? 'style=text-decoration: underline;' : null}}>{{\Illuminate\Support\Str::limit($coop_relation['area_of_coop'], 50)}}</a>
                             @endif
                         @endforeach

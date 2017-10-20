@@ -48,7 +48,7 @@ class UserController extends MainController {
         $page_title = 'User';
 
         $auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
-        if($auth->contains('unit',NULL)){
+        if(!$auth->contains('auth_type','SU')){
             return abort('403');
         }
 

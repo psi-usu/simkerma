@@ -34,17 +34,12 @@
                             <div class="clearfix"></div>
                         </div><!-- /.panel-heading -->
                         <div class="panel-body">
-                            {{--id='report_coop'--}}
-                            <form action="report" method="post" enctype="multipart/form-data">
+                            {{--action="report"--}}
+                            <form id='report_coop' method="post" enctype="multipart/form-data">
                                 {{csrf_field()}}
                                 <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-sm-3"></div>
-                                        <div class="col-sm-3 text-danger text-center"><small><i>Tanggal Tanda Tangan</i></small></div>
-                                        <div class="col-sm-3 text-danger text-center"><small><i>Tanggal Berakhir Kerjasama</i></small></div>
-                                        <div class="col-sm-3"></div>
-                                    </div>
-                                    <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="name" class="control-label">Pilih Jenis Kerjasama</label>
                                         <select class="select2 multiple mb-15" name='coop_type' id="coop_type" data-placeholder="Pilih Jenis Kerjasama" required>
                                             <option value="all">Semua Kerjasama</option>
                                             <option value="MOU">MoU / Nota Kesepahaman</option>
@@ -52,13 +47,14 @@
                                             <option value="ADDENDUM">ADDENDUM</option>
                                         </select>
                                     </div>
-                                    <div class="col-sm-3">
-                                        <input type="text" class="date-range-picker form-control" required="" name='sign_date' id='sign_date' placeholder="Tanggal Tandatangan">
+                                    <label for="name" class="control-label">Tanggal Tanda Tangan</label>
+                                    <div class="input-group input-daterange form-group">
+                                        <input type="text" class="date-picker form-control" required="" name='sign_date1' id='sign_date1'>
+                                        <div class="input-group-addon">-</div>
+                                        <input type="text" class="date-picker form-control" required="" name='sign_date2' id='sign_date2'>
                                     </div>
-                                    <div class="col-sm-3">
-                                        <input type="text" class="date-range-picker form-control" required="" name='end_date' id='end_date' />
-                                    </div>
-                                    <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="name" class="control-label">Pilih Partner</label>
                                         <select class="select2 multiple mb-15" name='partner' id="partner" data-placeholder="Pilih Instansi/Unit" required>
                                             <option value="all">Semua Instansi / Unit</option>
                                             @foreach($partners as $partner)
