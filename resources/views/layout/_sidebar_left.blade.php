@@ -27,7 +27,7 @@
             </a>
         </li>
         <li class="submenu {!! Request::is('/', 'cooperations/soon-ends') ? 'active' : null !!}">
-            <a href="{{url('/', 'cooperations/soon-ends')}}">
+            <a href="{{url('cooperations/soon-ends')}}">
                 <span class="icon"><i class="fa fa-hand-stop-o"></i></span>
                 <span class="text">Kerjasama Segera Berakhir</span>
                 {!! Request::is('/', 'cooperations/soon-ends') ? '<span class="selected"></span>' : null !!}
