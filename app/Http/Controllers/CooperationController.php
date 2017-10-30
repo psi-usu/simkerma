@@ -518,7 +518,7 @@ class CooperationController extends MainController {
         {
             $prev_coop = Cooperation::find($cooperation->cooperation_id);
         }
-
+        
         if($cooperation->coop_type == 'MOU')
             $coop_tree_relations = $this->getCoopRelation($input['id']);
         if($cooperation->coop_type == 'MOA' || $cooperation->coop_type == 'SPK' || $cooperation->coop_type == 'ADDENDUM' && $cooperation->cooperation_id!=null)
@@ -1195,10 +1195,10 @@ class CooperationController extends MainController {
             }else{
                 $data['data'][$i][3] = "";
             }
-            $data['data'][$i][4] = $coop_type->type;
+            $data['data'][$i][4] = $cooperation->coop_type;
             $data['data'][$i][5] = $cooperation->form_of_coop;
             $data['data'][$i][6] = date('d F Y', strtotime($cooperation->end_date));
-            $data['data'][$i][7] = '<a href="cooperations/display?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Lihat"> <button class="btn btn-theme btn-sm rounded coop-view-btn"><i class="fa fa-eye" style="color:white;"></i></button></a>';
+            $data['data'][$i][7] = '<a href="display?id='.$cooperation->id.'" data-toggle="tooltip" data-placement="top" title="Lihat"> <button class="btn btn-theme btn-sm rounded coop-view-btn"><i class="fa fa-eye" style="color:white;"></i></button></a>';
             $i++;
         }
 
@@ -1475,7 +1475,7 @@ class CooperationController extends MainController {
 
     private function getCoopRelation($id)
     {
-        $cooperation = Cooperation::where('status','AC')->find($id);
+        $cooperation = Cooperation::find($id);
         if ($cooperation->coop_type == "MOU")
         {
             $mou_coop = $cooperation; //MOU

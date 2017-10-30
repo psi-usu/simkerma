@@ -41,7 +41,7 @@ class IsAuth {
             }
         }
         );
-        if (! $login->logged_in)
+        if (! $login)
         {
             $url = JWTAuth::makeLink([
                 'baseUrl'  => 'https://akun.usu.ac.id/auth/login',
