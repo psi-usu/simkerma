@@ -480,7 +480,7 @@ class CooperationController extends MainController {
 
         if($this->isAdmin($this->user_info['username'])){
             $edit = true;
-        }if($this->isOthers($this->user_info['username'])){
+        }elseif($this->isOthers($this->user_info['username'])){
             $edit = false;
         }else{
             if($cooperation->coop_type=='MOU'){
