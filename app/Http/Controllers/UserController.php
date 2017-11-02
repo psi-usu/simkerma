@@ -117,18 +117,6 @@ class UserController extends MainController {
         $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
 
-        $study_programs = [];
-        foreach ($faculties as $faculty)
-        {
-            $study_program = $simsdm->studyProgram($faculty['code']);
-            if (! empty($study_program))
-            {
-                foreach ($study_program as $item)
-                {
-                    $study_programs[] = $item;
-                }
-            }
-        }
 
         $isSuper = null;
         $authentication= null;
@@ -150,7 +138,6 @@ class UserController extends MainController {
             'upd_mode',
             'action_url',
             'units',
-            'study_programs',
             'isSuper',
             'authentication'
         ));
@@ -217,18 +204,7 @@ class UserController extends MainController {
             $unit['name'] = $faculty['name'];
             $units[] = $unit;
         }
-        $study_programs = [];
-        foreach ($faculties as $faculty)
-        {
-            $study_program = $simsdm->studyProgram($faculty['code']);
-            if (! empty($study_program))
-            {
-                foreach ($study_program as $item)
-                {
-                    $study_programs[] = $item;
-                }
-            }
-        }
+      
         $isSuper = null;
         $authentication = null;
         $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();

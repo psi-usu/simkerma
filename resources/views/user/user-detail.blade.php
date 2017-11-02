@@ -119,10 +119,6 @@
                                                                 @endforeach
                                                             @endif
                                                         @endif
-
-                                                        @foreach($study_programs as $study_program)
-                                                            <option value="{{$study_program['name']}}" {{$item['sub_unit'] == $study_program['name'] ? 'selected' : null}}>{{$study_program['name']}}</option>
-                                                        @endforeach
                                                     </select>
                                                 </td>
                                                 <td>
@@ -153,9 +149,6 @@
                                                             <option value="{{$unit['code']}}">{{$unit['name']}}</option>
                                                         @endforeach
                                                     @endif
-                                                    @foreach($study_programs as $study_program)
-                                                        <option value="{{$study_program['name']}}">{{$study_program['name']}}</option>
-                                                    @endforeach
                                                 </select>
                                             </td>
                                             <td>
