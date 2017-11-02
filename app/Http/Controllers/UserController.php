@@ -152,14 +152,7 @@ class UserController extends MainController {
             $user_auth = new UserAuth();
             $user_auth->username = $request->username;
             $user_auth->auth_type = $request->input('auth_type')[$key];
-
-            $unit = $request->input('unit')[$key];
-            if(is_array($units) && in_array($unit, $units)){
-                $user_auth->unit = $unit;
-            }else{
-                $user_auth->sub_unit = $unit;
-            }
-
+            $user_auth->unit = $unit;
             $user_auth->created_by = Auth::user()->username;
             $user_auths->push($user_auth);
         }
@@ -248,11 +241,7 @@ class UserController extends MainController {
                 $user_auth->username = $request->username;
                 $user_auth->auth_type = $request->input('auth_type')[$key];
                 $unit = $request->input('unit')[$key];
-                if(is_array($units) && in_array($unit, $units)){
-                    $user_auth->unit = $unit;
-                }else{
-                    $user_auth->sub_unit = $unit;
-                }
+                $user_auth->unit = $unit;
                 $user_auth->created_by = Auth::user()->username;
                 $user_auths->push($user_auth);
             }
@@ -356,51 +345,4 @@ class UserController extends MainController {
 
         return $temp_array;
     }
-
-    public function sendForgotEmail(SendForgotEmailRequest $request)
-    {
-//        if (isset($request->username))
-//        {
-//            $user_account = User::where('username', $request->username)->first()->userAccount()->first();
-//        } else
-//        {
-//            $user_account = UserAccount::where('email', $request->email)->first();
-//        }
-//
-//        DB::transaction(function () use ($user_account, $request)
-//        {
-//            $password_reset = PasswordReset::where('username', $request->username)->first();
-//            if (is_null($password_reset))
-//            {
-//                $password_reset = new PasswordReset();
-//                $password_reset->username = $user_account->user()->first()->username;
-//                $password_reset->token = sha1(bcrypt($password_reset->username));
-//                $password_reset->created_at = Carbon::now()->toDateTimeString();
-//                $password_reset->save();
-//            }
-//
-//            //Send Email
-//            $recipients = $user_account->email;
-//            $email['subject'] = '[ISICASH] Permintaan Reset Password';
-//            $email['full_name'] = $user_account->full_name;
-//            $email['body_content'] = 'Berikut adalah link untuk melakukan reset password : <a href="' . URL::to('user/reset?username=' . $password_reset->username . '&token=' . $password_reset->token) . '" target="_blank">reset password</a>.
-//            Jika anda tidak mengenali atau tidak melakukan reset password, harap mengabaikan email ini.';
-//            $email['footer'] = 'Terima kasih';
-//
-//            dispatch(new SendRegistrationJob($recipients, $email));
-//        });
-//        $request->session()->flash('alert-success', 'Email telah dikirim, silahkan cek email anda!');
-//
-//        return redirect()->intended('user/login');
-    }
-
-//    public function store(StoreUserRequest $request)
-//    {
-//        $input = Input::get();
-//
-//        $user = new User();
-//        $user->fill($input);
-//        $user->password = bcrypt($request->password);
-//        $user->save();
-//    }
 }
