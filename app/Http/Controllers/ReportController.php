@@ -12,6 +12,7 @@ use View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use parinpan\fanjwt\libs\JWTAuth;
 
 class ReportController extends MainController
 {
