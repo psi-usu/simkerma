@@ -793,27 +793,36 @@ $(document).ready(function () {
 
     $('.table-add').click(function (e) {
         e.preventDefault();
-        if ($("#moa-table").length) {
-            var v_table = $("#moa-table");
-        } else if ($("#user-auth-table").length) {
+       if ($("#user-auth-table").length) {
             var v_table = $("#user-auth-table");
-        }else if($("#spk-table").length){
-            var v_table = $("#spk-table");
+        }else if ($("#MoA #moa-table").length) {
+            var v_table = $("#MoA #moa-table");
         }
+
         var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
         if ($("#moa-table").length) {
             $clone.find("input").attr("disabled", false);
-        }
-        else if ($("#user-auth-table").length) {
+        }else if ($("#user-auth-table").length) {
             $clone.find("select").attr("disabled", false);
             $clone.find("select").addClass("select2");
-        }else if($("#spk-table").length){
-            $clone.find("input").attr("disabled", false);
         }
         v_table.find('table').append($clone);
         if ($("#user-auth-table").length) {
             $(".select2").select2();
         }
+    });
+
+    $('.table-addSPK').click(function (e) {
+        e.preventDefault();
+        if($("#SPK #spk-table").length){
+            var v_table = $("#SPK #spk-table");
+        } 
+
+        var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
+       if($("#spk-table").length){
+            $clone.find("input").attr("disabled", false);
+        }
+        v_table.find('table').append($clone);
     });
 
     $('.table-remove').click(function (e) {
@@ -827,6 +836,14 @@ $(document).ready(function () {
     }
 
     $(document).on("change", "#moa-table input[name^=item_total_amount]", function () {
+        sumTotalAmount();
+    })
+
+    if ($("#spk-table").length) {
+        $(":input").inputmask()
+    }
+
+    $(document).on("change", "#spk-input[name^=item_total_amount]", function () {
         sumTotalAmount();
     })
 

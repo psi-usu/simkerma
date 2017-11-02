@@ -13,7 +13,7 @@
         $coop_id = $cooperation['cooperation_id'];
 @endphp
 
-<!-- MOA -->
+<!-- SPK -->
 <div id="SPK" style='display: none !important;'>
     <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
         <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
@@ -64,7 +64,7 @@
     </div>
     <!-- END MOU INFORMATION -->
 
-    <!-- MOA -->
+    <!-- SPK -->
     <div class="form-group form-group-divider">
         <div class="form-inner">
             <h4 class="no-margin">Data SPK / Surat Perintah Kerjasama (Mohon Diisi)</h4>
@@ -72,7 +72,7 @@
     </div>
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
         <label for="area_of_coop" class="control-label">Bidang Kerjasama SPK / Surat Perintah Kerjasama</label>
-        <textarea name="area_of_coop" class="form-control" id="bid_kerma_moa"
+        <textarea name="area_of_coop" class="form-control" id="bid_kerma_spk"
                   placeholder="Bidang Kerjasama SPK / Surat Perintah Kerjasama" required>{{$cooperation['area_of_coop']}}</textarea>
         @if($errors->has('area_of_coop'))
             <label class="error" style="display: inline-block;">
@@ -169,10 +169,11 @@
     </div>
     @if($upd_mode != "display")
         <div class="form-group">
-            <a href="#" class="btn btn-theme btn-md rounded table-add" title="Tambah"><i class="fa fa-plus"></i></a>
+            <a href="#" class="btn btn-theme btn-md rounded table-addSPK" title="Tambah"><i class="fa fa-plus"></i></a>
         </div>
     @endif
-    <div id="moa-table" class="form-group table-responsive">
+
+    <div id="spk-table" class="form-group table-responsive">
         <table class="table">
             <thead>
             <th class="text-center">Nama Pekerjaan / Barang</th>

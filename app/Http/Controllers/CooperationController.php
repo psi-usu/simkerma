@@ -55,8 +55,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-//            $login->payload->identity = env('LOGIN_USERNAME');
-            $login->payload->identity = env('USERNAME_LOGIN');
+           $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -557,8 +557,8 @@ class CooperationController extends MainController {
     }
 
     public function edit(){
-        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
-        if($user_auth)
+        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+        if(!$user_auth)
             return abort('403');
 
         $input = Input::all();
@@ -1482,7 +1482,7 @@ class CooperationController extends MainController {
         } elseif ($cooperation->coop_type == "MOA" || $cooperation->coop_type == "SPK")
         {
             $mou_coop = Cooperation::find($cooperation->cooperation_id); //MOU
-            dd($mou_coop);
+
         } elseif ($cooperation->coop_type == "ADDENDUM")
         {
             $prev_coop = Cooperation::find($cooperation->cooperation_id);
@@ -1494,126 +1494,127 @@ class CooperationController extends MainController {
                 $mou_coop = Cooperation::find($prev_coop->cooperation_id); //MOU
             }
         }
-        $addendum_coops = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $mou_coop->id)->get(); //ADDENDUM MOU
 
-        $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        if(!is_null($mou_coop)){
+            $addendum_coops = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $mou_coop->id)->get(); //ADDENDUM MOU
+            $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
 
-        $spk_coops = new Collection();
-        foreach ($user_auth as $user){
-            if($user->auth_type=='SU' || $user->auth_type=='SAU'){
-                $spk_coops = Cooperation::where("coop_type", "SPK")->where("cooperation_id", $mou_coop->id)->get(); //SPK
-            }else{
-                $spk_coop = Cooperation::where('coop_type', 'SPK')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
-
-                if($spk_coop){
-                    $merged = $spk_coops->merge($spk_coop);
-                    $spk_coops = $merged;
-                }
-
-                $spk_coop_sub = Cooperation::where('coop_type', 'SPK')->where('sub_unit',$user->sub_unit)->get();
-                if($spk_coop_sub){
-                    $spk_coops->merge($spk_coop_sub);
-                }
-            }
-        }
-
-        $moa_coops = new Collection();
-        foreach ($user_auth as $user){
-            if($user->auth_type=='SU' || $user->auth_type=='SAU'){
-                $moa_coops = Cooperation::where("coop_type", "MOA")->where("cooperation_id", $mou_coop->id)->get(); //MOA
-            }else{
-                $moa_coop = Cooperation::where('coop_type', 'MOA')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
-
-                if($moa_coop){
-                    $merged = $moa_coops->merge($moa_coop);
-                    $moa_coops = $merged;
-                }
-
-                $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->sub_unit)->get();
-                if($moa_coop_sub){
-                    $moa_coops->merge($moa_coop_sub);
-                }
-            }
-        }
-
-        $moa_addendum_coops = new Collection(); // ADDENDUM MOA
-        foreach ($moa_coops as $moa_coop)
-        {
+            $spk_coops = new Collection();
             foreach ($user_auth as $user){
                 if($user->auth_type=='SU' || $user->auth_type=='SAU'){
-                    $moa_addendums = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->get();
-                    foreach ($moa_addendums as $moa_addendum)
-                    {
-                        $moa_addendum_coops->add($moa_addendum);
-                    }
+                    $spk_coops = Cooperation::where("coop_type", "SPK")->where("cooperation_id", $mou_coop->id)->get(); //SPK
                 }else{
-                    $moa_addendums_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('unit',$user->unit)->get();
-                    if($moa_addendums_unit){
-                        foreach ($moa_addendums_unit as $moa_addendum)
+                    $spk_coop = Cooperation::where('coop_type', 'SPK')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
+
+                    if($spk_coop){
+                        $merged = $spk_coops->merge($spk_coop);
+                        $spk_coops = $merged;
+                    }
+
+                    $spk_coop_sub = Cooperation::where('coop_type', 'SPK')->where('sub_unit',$user->sub_unit)->get();
+                    if($spk_coop_sub){
+                        $spk_coops->merge($spk_coop_sub);
+                    }
+                }
+            }
+
+            $moa_coops = new Collection();
+            foreach ($user_auth as $user){
+                if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                    $moa_coops = Cooperation::where("coop_type", "MOA")->where("cooperation_id", $mou_coop->id)->get(); //MOA
+                }else{
+                    $moa_coop = Cooperation::where('coop_type', 'MOA')->where("cooperation_id", $mou_coop->id)->where('unit',$user->unit)->get();
+
+                    if($moa_coop){
+                        $merged = $moa_coops->merge($moa_coop);
+                        $moa_coops = $merged;
+                    }
+
+                    $moa_coop_sub = Cooperation::where('coop_type', 'MOA')->where('sub_unit',$user->sub_unit)->get();
+                    if($moa_coop_sub){
+                        $moa_coops->merge($moa_coop_sub);
+                    }
+                }
+            }
+
+            $moa_addendum_coops = new Collection(); // ADDENDUM MOA
+            foreach ($moa_coops as $moa_coop)
+            {
+                foreach ($user_auth as $user){
+                    if($user->auth_type=='SU' || $user->auth_type=='SAU'){
+                        $moa_addendums = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->get();
+                        foreach ($moa_addendums as $moa_addendum)
                         {
                             $moa_addendum_coops->add($moa_addendum);
                         }
-                    }
+                    }else{
+                        $moa_addendums_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('unit',$user->unit)->get();
+                        if($moa_addendums_unit){
+                            foreach ($moa_addendums_unit as $moa_addendum)
+                            {
+                                $moa_addendum_coops->add($moa_addendum);
+                            }
+                        }
 
-                    $moa_addendums_sub_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('sub_unit',$user->sub_unit)->get();
-                    if($moa_addendums_sub_unit){
-                        foreach ($moa_addendums_sub_unit as $moa_addendum)
-                        {
-                            $moa_addendum_coops->add($moa_addendum);
+                        $moa_addendums_sub_unit = Cooperation::where("coop_type", "ADDENDUM")->where("cooperation_id", $moa_coop->id)->where('sub_unit',$user->sub_unit)->get();
+                        if($moa_addendums_sub_unit){
+                            foreach ($moa_addendums_sub_unit as $moa_addendum)
+                            {
+                                $moa_addendum_coops->add($moa_addendum);
+                            }
                         }
                     }
                 }
             }
-        }
 
-        $ret = [];
-        $ret[0]['level'] = 1;
-        $ret[0]['id'] = $mou_coop->id;
-        $ret[0]['area_of_coop'] = $mou_coop->area_of_coop;
-        $ret[0]['coop_type'] = $mou_coop->coop_type;
-        $i = 1;
-        foreach ($addendum_coops as $item)
-        {
-            $ret[$i]['level'] = 2;
-            $ret[$i]['id'] = $item->id;
-            $ret[$i]['area_of_coop'] = $item->area_of_coop;
-            $ret[$i]['parent_id'] = $item->cooperation_id;
-            $ret[$i]['coop_type'] = $item->coop_type;
-            $i++;
-        }
-        foreach ($spk_coops as $item)
-        {
-            $ret[$i]['level'] = 3;
-            $ret[$i]['id'] = $item->id;
-            $ret[$i]['area_of_coop'] = $item->area_of_coop;
-            $ret[$i]['parent_id'] = $item->cooperation_id;
-            $ret[$i]['coop_type'] = $item->coop_type;
-            $i++;
-        }
-        foreach ($moa_coops as $item)
-        {
-            $ret[$i]['level'] = 3;
-            $ret[$i]['id'] = $item->id;
-            $ret[$i]['area_of_coop'] = $item->area_of_coop;
-            $ret[$i]['parent_id'] = $item->cooperation_id;
-            $ret[$i]['coop_type'] = $item->coop_type;
-            $i++;
-        }
-        foreach ($moa_addendum_coops as $item)
-        {
-            $ret[$i]['level'] = 4;
-            $ret[$i]['id'] = $item->id;
-            $ret[$i]['area_of_coop'] = $item->area_of_coop;
-            $ret[$i]['parent_id'] = $item->cooperation_id;
-            $ret[$i]['coop_type'] = $item->coop_type;
-            $i++;
-        }
+            $ret = [];
+            $ret[0]['level'] = 1;
+            $ret[0]['id'] = $mou_coop->id;
+            $ret[0]['area_of_coop'] = $mou_coop->area_of_coop;
+            $ret[0]['coop_type'] = $mou_coop->coop_type;
+            $i = 1;
 
-        return $ret;
-    }
+            foreach ($addendum_coops as $item)
+            {
+                $ret[$i]['level'] = 2;
+                $ret[$i]['id'] = $item->id;
+                $ret[$i]['area_of_coop'] = $item->area_of_coop;
+                $ret[$i]['parent_id'] = $item->cooperation_id;
+                $ret[$i]['coop_type'] = $item->coop_type;
+                $i++;
+            }
 
-    public function test()
-    {
-        echo bcrypt('erty975');
+            foreach ($spk_coops as $item)
+            {
+                $ret[$i]['level'] = 3;
+                $ret[$i]['id'] = $item->id;
+                $ret[$i]['area_of_coop'] = $item->area_of_coop;
+                $ret[$i]['parent_id'] = $item->cooperation_id;
+                $ret[$i]['coop_type'] = $item->coop_type;
+                $i++;
+            }
+
+            foreach ($moa_coops as $item)
+            {
+                $ret[$i]['level'] = 3;
+                $ret[$i]['id'] = $item->id;
+                $ret[$i]['area_of_coop'] = $item->area_of_coop;
+                $ret[$i]['parent_id'] = $item->cooperation_id;
+                $ret[$i]['coop_type'] = $item->coop_type;
+                $i++;
+            }
+            foreach ($moa_addendum_coops as $item)
+            {
+                $ret[$i]['level'] = 4;
+                $ret[$i]['id'] = $item->id;
+                $ret[$i]['area_of_coop'] = $item->area_of_coop;
+                $ret[$i]['parent_id'] = $item->cooperation_id;
+                $ret[$i]['coop_type'] = $item->coop_type;
+                $i++;
+            }
+
+            return $ret;
+        }
+        
     }
 }
