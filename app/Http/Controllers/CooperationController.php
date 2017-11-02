@@ -588,11 +588,10 @@ class CooperationController extends MainController {
         $cooperation->sign_date = date('d-m-Y', strtotime($cooperation->sign_date));
         $cooperation->end_date = date('d-m-Y', strtotime($cooperation->end_date));
 
-        if($cooperation->coop_type!='MOU'){
-            if($cooperation->cooperation_id!=null){
-                $coop_tree_relations = $this->getCoopRelation($input['id']);
-            }
-        }
+        if($cooperation->coop_type == 'MOU')
+            $coop_tree_relations = $this->getCoopRelation($input['id']);
+        if($cooperation->coop_type == 'MOA' || $cooperation->coop_type == 'SPK' || $cooperation->coop_type == 'ADDENDUM' && $cooperation->cooperation_id!=null)
+            $coop_tree_relations = $this->getCoopRelation($input['id']);
 
         $coop_relations = Cooperation::where('cooperation_id', $cooperation->id)->get();
         $partners = Partner::all();
@@ -947,7 +946,10 @@ class CooperationController extends MainController {
             $prev_coop = Cooperation::find($cooperation->cooperation_id);
         }
 
-        $coop_tree_relations = $this->getCoopRelation($input['id']);
+        if($cooperation->coop_type == 'MOU')
+            $coop_tree_relations = $this->getCoopRelation($input['id']);
+        if($cooperation->coop_type == 'MOA' || $cooperation->coop_type == 'SPK' || $cooperation->coop_type == 'ADDENDUM' && $cooperation->cooperation_id!=null)
+            $coop_tree_relations = $this->getCoopRelation($input['id']);
 
         $isSuper = null;
         $isOperator = false;
