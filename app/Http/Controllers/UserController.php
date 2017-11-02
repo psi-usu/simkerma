@@ -114,7 +114,6 @@ class UserController extends MainController {
         $action_url = 'users/create';
 
         $simsdm = new Simsdm();
-        $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
 
 
@@ -196,14 +195,7 @@ class UserController extends MainController {
         $action_url = 'users/edit';
 
         $simsdm = new Simsdm();
-        $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
-        foreach ($faculties as $faculty)
-        {
-            $unit['code'] = $faculty['code'];
-            $unit['name'] = $faculty['name'];
-            $units[] = $unit;
-        }
       
         $isSuper = null;
         $authentication = null;
@@ -230,7 +222,6 @@ class UserController extends MainController {
             'upd_mode',
             'action_url',
             'units',
-            'study_programs',
             'user_auths',
             'user_auth',
             'isSuper',
