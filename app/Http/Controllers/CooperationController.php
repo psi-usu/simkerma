@@ -277,7 +277,8 @@ class CooperationController extends MainController {
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
-                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
+                        dd($coop_item->item_quantity);
                         $coop_item->item_uom = $input['item_uom'][$key];
                         $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
                         $coop_item->item_annotation = $input['item_annotation'][$key];
@@ -381,7 +382,7 @@ class CooperationController extends MainController {
 
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
-                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
                         $coop_item->item_uom = $input['item_uom'][$key];
                         
                         if(isset($input['item_total_amount'][$key])){
@@ -708,7 +709,7 @@ class CooperationController extends MainController {
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
 
-                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
                         $coop_item->item_uom = $input['item_uom'][$key];
                         $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
                         $coop_item->item_annotation = $input['item_annotation'][$key];
@@ -809,7 +810,7 @@ class CooperationController extends MainController {
 
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
-                        $coop_item->item_quantity = $input['item_quantity'][$key];
+                        $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
                         $coop_item->item_uom = $input['item_uom'][$key];
 
                         if(isset($input['item_total_amount'][$key])){

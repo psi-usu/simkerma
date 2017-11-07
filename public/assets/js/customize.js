@@ -846,7 +846,7 @@ $(document).ready(function () {
          $(":input").inputmask();
     })
 
-    $(document).on("change", "#moa-table input[name^=item_total_amount]", function () {
+    $(document).on("keyup", "#moa-table input[name^=item_total_amount]", function () {
         sumTotalAmount();
     })
 
@@ -854,7 +854,7 @@ $(document).ready(function () {
         $(":input").inputmask();
     }
 
-    $(document).on("change", "#spk-table input[name^=item_total_amount]", function () {
+    $(document).on("keyup", "#spk-table input[name^=item_total_amount]", function () {
         sumTotalAmount();
     })
 
