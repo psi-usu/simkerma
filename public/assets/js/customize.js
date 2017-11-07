@@ -802,6 +802,8 @@ $(document).ready(function () {
         var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
         if ($("#moa-table").length) {
             $clone.find("input").attr("disabled", false);
+
+            $(":input").inputmask();
         }else if ($("#user-auth-table").length) {
             $clone.find("select").attr("disabled", false);
             $clone.find("select").addClass("select2");
@@ -819,8 +821,9 @@ $(document).ready(function () {
         } 
 
         var $clone = v_table.find('tr.hide').clone(true).removeClass('hide table-line');
-       if($("#spk-table").length){
+        if($("#spk-table").length){
             $clone.find("input").attr("disabled", false);
+            $(":input").inputmask();
         }
         v_table.find('table').append($clone);
     });
@@ -834,6 +837,14 @@ $(document).ready(function () {
     if ($("#moa-table").length) {
         $(":input").inputmask();
     }
+
+    $(document).on("keyup", "#moa-table input", function () {
+         $(":input").inputmask();
+    })
+
+    $(document).on("keyup", "#spk-table input", function () {
+         $(":input").inputmask();
+    })
 
     $(document).on("change", "#moa-table input[name^=item_total_amount]", function () {
         sumTotalAmount();
