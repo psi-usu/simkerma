@@ -86,7 +86,8 @@ class MainController extends Controller {
         $this->js['scripts'] = [
             'js/apps.js',
             'js/pages/blankon.dashboard.js',
-            'js/demo.js'
+            'js/demo.js',
+            'js/jQuery.scrollSpeed.js'
         ];
 
         // pass variable to view

@@ -176,6 +176,7 @@ class StoreCooperationRequest extends FormRequest {
                 }
 
                 $UserAuth = new UserAuth();
+                
                 $user = Auth::user();
                 if (!$UserAuth->isSuperUser($user) && !$UserAuth->isSuperAdminUnit($user)){
                     $ret[] = 'Anda tidak mempunyai hak akses untuk membuat kerjasama MOU ini';

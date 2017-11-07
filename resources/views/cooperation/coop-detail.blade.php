@@ -54,9 +54,9 @@
     if(!isset($rj_note))
         $rj_note = "";
     if(!isset($moa_coops))
-            $moa_coops = new \App\Cooperation();
+        $moa_coops = new \App\Cooperation();
     if(!isset($prev_coop))
-            $prev_coop = new \App\Cooperation();
+        $prev_coop = new \App\Cooperation();
 @endphp
 
 @section('content')

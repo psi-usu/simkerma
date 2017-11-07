@@ -44,6 +44,7 @@
                                             <option value="all">Semua Kerjasama</option>
                                             <option value="MOU">MoU / Nota Kesepahaman</option>
                                             <option value="MOA">MoA / Perjanjian Kerja Sama</option>
+                                            <option value="MOA">SPK / Surat Perjanjian Kerja Sama</option>
                                             <option value="ADDENDUM">ADDENDUM</option>
                                         </select>
                                     </div>

@@ -17,7 +17,7 @@
 <div id="SPK" style='display: none !important;'>
     <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
         <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
-        <select name="cooperation_id" class="form-control select2" style="width: 100%;" required>
+        <select name="cooperation_id" class="form-control select2" style="width: 100%;">
             <option value="" disabled selected>-- Pilih MOU berdasarkan Bidang Kerjasama --</option>
             @foreach($mou_coops as $mou_coop)
                 <option value="{{$mou_coop['id']}}"
@@ -73,7 +73,7 @@
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
         <label for="area_of_coop" class="control-label">Bidang Kerjasama SPK / Surat Perintah Kerjasama</label>
         <textarea name="area_of_coop" class="form-control" id="bid_kerma_spk"
-                  placeholder="Bidang Kerjasama SPK / Surat Perintah Kerjasama" required>{{$cooperation['area_of_coop']}}</textarea>
+                  placeholder="Bidang Kerjasama SPK / Surat Perintah Kerjasama">{{$cooperation['area_of_coop']}}</textarea>
         @if($errors->has('area_of_coop'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('area_of_coop')}}
@@ -83,7 +83,7 @@
     <div class="form-group {{$errors->has('implementation') ? 'has-error' : null}}">
         <label for="implementation" class="control-label">Implementasi</label>
         <textarea name="implementation" class="form-control" id="implementasi" placeholder="implementasi"
-                  required>{{$cooperation['implementation']}}</textarea>
+                 >{{$cooperation['implementation']}}</textarea>
         @if($errors->has('implementation'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('implementation')}}
@@ -92,22 +92,19 @@
     </div>
     @include('layout.input-date', ['passing_variable' => 'sign_date', 'passing_description' => 'Tanggal Tanda Tangan'])
     @include('layout.input-date', ['passing_variable' => 'end_date', 'passing_description' => 'Tanggal Berakhir'])
+    
     <div class="form-group {{$errors->has('unit') ? 'has-error' : null}} ">
         <label for="unit" class="control-label">Unit yang melakukan kerjasama</label>
         <div>
-            <select name='unit' class="form-control select2 mb-15">
+            <select name='unit' class="form-control select2 mb-15" >
                 <option value="" disabled selected>-- Pilih Unit --</option>
-                @foreach($faculties as $faculty)
-                    <option value="{{$faculty['code']}}"
-                            {{$cooperation['unit'] == $faculty['code'] ? 'selected' : null}}>
-                        {{$faculty['name']}}
-                    </option>
-                @endforeach
                 @foreach($units as $unit)
-                    <option value="{{$unit['code']}}"
-                            {{$cooperation['unit'] == $unit['code'] ? 'selected' : null}}>
-                        {{$unit['name']}}
-                    </option>
+                   @if(!empty($unit['code']))
+                        <option value="{{$unit['code']}}"
+                                {{$cooperation['unit'] == $unit['code'] ? 'selected' : null}}>
+                            {{$unit['name']}}
+                        </option>
+                    @endif
                 @endforeach
             </select>
             @if($errors->has('unit'))
@@ -149,7 +146,7 @@
     <div class="form-group {{$errors->has('usu_doc_no') ? 'has-error' : null}}">
         <label for="usu_doc_no" class="control-label">Nomor Dokumen USU</label>
         <input name='usu_doc_no' class="form-control" type="text" placeholder="Nomor Dokumen USU"
-               value="{{$cooperation['usu_doc_no']}}" required>
+               value="{{$cooperation['usu_doc_no']}}">
         @if($errors->has('usu_doc_no'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('usu_doc_no')}}
@@ -160,7 +157,7 @@
         <label for="partner_doc_no" class="control-label">Nomor Dokumen Instansi Partner</label>
         <input name='partner_doc_no' class="form-control" type="text"
                placeholder="Nomor Dokumen Instansi Partner"
-               value="{{$cooperation['partner_doc_no']}}" required>
+               value="{{$cooperation['partner_doc_no']}}">
         @if($errors->has('partner_doc_no'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('partner_doc_no')}}

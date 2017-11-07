@@ -115,7 +115,9 @@
                                                         @if($authentication=='SAU' || $authentication=='SU')
                                                             @if($item['unit']!=NULL)
                                                                 @foreach($units as $unit)
-                                                                    <option value="{{$unit['code']}}" {{$item['unit'] == $unit['code'] ? 'selected' : null}}>{{$unit['name']}}</option>
+                                                                    @if(!empty($unit['code']))
+                                                                       <option value="{{$unit['code']}}" {{$item['unit'] == $unit['code'] ? 'selected' : null}}>{{$unit['name']}}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             @endif
                                                         @endif
@@ -146,7 +148,9 @@
                                                         disabled>
                                                     @if($authentication=='SU' || $authentication=='SAU')
                                                         @foreach($units as $unit)
-                                                            <option value="{{$unit['code']}}">{{$unit['name']}}</option>
+                                                            @if(!empty($unit['code']))
+                                                               <option value="{{$unit['code']}}">{{$unit['name']}}</option>
+                                                            @endif
                                                         @endforeach
                                                     @endif
                                                 </select>

@@ -47,8 +47,9 @@ class UserController extends MainController {
     {
         $page_title = 'User';
 
-        $auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
-        if(!$auth->contains('auth_type','SU')){
+        $auth = UserAuth::where('username',$this->user_info['username'])->get();
+
+        if(!$auth->contains('auth_type','SU') && !$auth->contains('auth_type','SAU')){
             return abort('403');
         }
 
@@ -152,7 +153,10 @@ class UserController extends MainController {
             $user_auth = new UserAuth();
             $user_auth->username = $request->username;
             $user_auth->auth_type = $request->input('auth_type')[$key];
+
+            $unit = $request->input('unit')[$key];
             $user_auth->unit = $unit;
+
             $user_auth->created_by = Auth::user()->username;
             $user_auths->push($user_auth);
         }

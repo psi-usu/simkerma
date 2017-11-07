@@ -55,8 +55,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-           $login->payload->identity = env('LOGIN_USERNAME');
-            // $login->payload->identity = env('USERNAME_LOGIN');
+           // $login->payload->identity = env('LOGIN_USERNAME');
+            $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -197,11 +197,12 @@ class CooperationController extends MainController {
 
         $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
 
+
         if($user_auth->isNotEmpty()){
             $isOperator = true;
         }
 
-        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type)','SAU')){
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
             $isSuper = true;
         }
 
@@ -345,9 +346,8 @@ class CooperationController extends MainController {
 
     public function storeTemp(Request $request)
     {
-        $this->authorize('create', Cooperation::class);
         $input = Input::all();
-
+        
         DB::transaction(function () use ($input, $request) {
             $cooperation = $this->moveCorresponding($input);
             $cooperation['created_by'] = Auth::user()->username;
@@ -381,14 +381,15 @@ class CooperationController extends MainController {
 
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
-
                         $coop_item->item_quantity = $input['item_quantity'][$key];
                         $coop_item->item_uom = $input['item_uom'][$key];
-                        if(isset($coop_item->item_total_amount)){
+                        
+                        if(isset($input['item_total_amount'][$key])){
                             $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
                         }else{
                             $coop_item->item_total_amount = 0;
                         }
+
                         $coop_item->item_annotation = $input['item_annotation'][$key];
                         $cooperation->contract_amount += $coop_item->item_total_amount;
                         $coop_items->add($coop_item);
@@ -518,7 +519,7 @@ class CooperationController extends MainController {
         {
             $prev_coop = Cooperation::find($cooperation->cooperation_id);
         }
-        
+
         if($cooperation->coop_type == 'MOU')
             $coop_tree_relations = $this->getCoopRelation($input['id']);
         if($cooperation->coop_type == 'MOA' || $cooperation->coop_type == 'SPK' || $cooperation->coop_type == 'ADDENDUM' && $cooperation->cooperation_id!=null)
@@ -558,6 +559,7 @@ class CooperationController extends MainController {
 
     public function edit(){
         $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+
         if(!$user_auth)
             return abort('403');
 
@@ -619,7 +621,7 @@ class CooperationController extends MainController {
         if($user_auth->isNotEmpty())
             $isOperator = true;
 
-        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type)','SAU'))
+        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU'))
             $isSuper = true;
 
         $units = [];
@@ -775,8 +777,6 @@ class CooperationController extends MainController {
 
     public function updateTemp(Request $request)
     {
-        $this->authorize('update', Cooperation::class);
-
         $input = Input::all();
 
         DB::transaction(function () use ($input, $request) {
@@ -809,17 +809,17 @@ class CooperationController extends MainController {
 
                         $coop_item->item = $key+1;
                         $coop_item->item_name = $input['item_name'][$key];
-
                         $coop_item->item_quantity = $input['item_quantity'][$key];
                         $coop_item->item_uom = $input['item_uom'][$key];
-                        if (isset($coop_item->item_total_amount))
-                        {
+
+                        if(isset($input['item_total_amount'][$key])){
                             $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
-                        } else
-                        {
+                        }else{
                             $coop_item->item_total_amount = 0;
                         }
+
                         $coop_item->item_annotation = $input['item_annotation'][$key];
+                        $cooperation->contract_amount = 0;
                         $cooperation->contract_amount += $coop_item->item_total_amount;
                         $coop_items->add($coop_item);
                     }
@@ -1617,6 +1617,6 @@ class CooperationController extends MainController {
 
             return $ret;
         }
-        
+
     }
 }

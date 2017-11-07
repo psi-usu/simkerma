@@ -31,7 +31,7 @@ $(document).ready(function () {
             var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
         }
 
-        var coopDatatable = $("#coop-list").dataTable({
+        var coopDatatable = $("#coop-list").dataTable({   
             autoWidth: false,
             responsive: true,
             ajax: baseUrl + 'cooperations/ajax',
@@ -832,7 +832,7 @@ $(document).ready(function () {
     });
 
     if ($("#moa-table").length) {
-        $(":input").inputmask()
+        $(":input").inputmask();
     }
 
     $(document).on("change", "#moa-table input[name^=item_total_amount]", function () {
@@ -840,10 +840,10 @@ $(document).ready(function () {
     })
 
     if ($("#spk-table").length) {
-        $(":input").inputmask()
+        $(":input").inputmask();
     }
 
-    $(document).on("change", "#spk-input[name^=item_total_amount]", function () {
+    $(document).on("change", "#spk-table input[name^=item_total_amount]", function () {
         sumTotalAmount();
     })
 
@@ -977,4 +977,6 @@ $(document).ready(function () {
 
         });
     });
+
+    jQuery.scrollSpeed(100, 800);
 });
