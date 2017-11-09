@@ -150,6 +150,12 @@ class CooperationController extends MainController {
 
             return view('landing-page', compact('login_link'));
         } else{
+            $user = new User();
+            $user->username = $login->payload->identity;
+            Auth::login($user);
+
+            $this->setUserInfo();
+            
             $page_title = 'Kerjasama Segera Berakhir';
 
             $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
