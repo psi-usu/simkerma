@@ -26,7 +26,7 @@ class CooperationController extends MainController {
 
     public function __construct()
     {
-        $this->middleware('is_auth')->except('index');
+        $this->middleware('is_auth')->except('soonEndsList');
 
         parent::__construct();
 
@@ -115,18 +115,54 @@ class CooperationController extends MainController {
 
     public function soonEndsList()
     {
-        $page_title = 'Kerjasama Segera Berakhir';
+        if (env('APP_ENV') == 'local')
+        {
+            $login = new \stdClass();
+            $login->logged_in = true;
+            $login->payload = new \stdClass();
+           // $login->payload->identity = env('LOGIN_USERNAME');
+            $login->payload->identity = env('USERNAME_LOGIN');
+        } else
+        {
+            $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
+            {
+                $loggedIn = $credential->logged_in;
+                if ($loggedIn)
+                {
+                    return $credential;
+                } else
+                {
+                    setcookie('ssotok', null, -1, '/');
 
-        $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
-        $auth = null;
-
-        if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
-            $auth = 'SU';
-        }else{
-            $auth = 'Admin';
+                    return false;
+                }
+            }
+            );
         }
 
-        return view('cooperation.coop-soon-ends', compact('page_title','auth'));
+        if (!$login)
+        {
+            $login_link = JWTAuth::makeLink([
+                'baseUrl'  => 'https://akun.usu.ac.id/auth/login',
+                'callback' => url('/') . '/callback.php',
+                'redir'    => url('/'),
+            ]);
+
+            return view('landing-page', compact('login_link'));
+        } else{
+            $page_title = 'Kerjasama Segera Berakhir';
+
+            $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
+            $auth = null;
+
+            if($user_auth->contains('auth_type','SU') || $user_auth->contains('auth_type','SAU')){
+                $auth = 'SU';
+            }else{
+                $auth = 'Admin';
+            }
+
+            return view('cooperation.coop-soon-ends', compact('page_title','auth'));
+        }
     }
 
     public function approveList()
