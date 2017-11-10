@@ -41,24 +41,19 @@ class UnitController extends MainController
     public function getAjax()
     {
         $simsdm = new Simsdm();
-        $faculties = $simsdm->facultyAll();
         $units = $simsdm->unitAll();
         $data = [];
 
         $i = 0;
-        foreach ($faculties as $faculty)
-        {
-            $data['data'][$i][0] = $i + 1;
-            $data['data'][$i][1] = $faculty['code'];
-            $data['data'][$i][2] = $faculty['name'];
-            $i++;
-        }
+       
         foreach ($units as $unit)
         {
-            $data['data'][$i][0] = $i + 1;
-            $data['data'][$i][1] = $unit['code'];
-            $data['data'][$i][2] = $unit['name'];
-            $i++;
+            if(!empty($unit['code'])){
+                $data['data'][$i][0] = $i + 1;
+                $data['data'][$i][1] = $unit['code'];
+                $data['data'][$i][2] = $unit['name'];
+                $i++;
+            }
         }
 
         $count_data = count($data);

@@ -1200,7 +1200,7 @@ class CooperationController extends MainController {
                 $coop = Cooperation::where('unit',$user_a->unit)->whereBetween('end_date', [$date1, $date2])->get();
                 $cooperations = $cooperations->merge($coop);
             }
-            $cooperations_mou = Cooperation::where('coop_type','MOU')->whereBetween('end_date', [$date1, $date2])->get();
+            $cooperations_mou = Cooperation::where('coop_type','MOU')->whereBetween('end_date', [$date1, $date2])->where('status','AC')->get();
             $cooperations = $cooperations->merge($cooperations_mou);
         }
 
