@@ -52,6 +52,7 @@
             <ul>
                 @can('admin-menu')
                     <li><a href="{{url('partners')}}">Instansi Partner</a></li>
+                    <li><a href="{{url('areas_of_coop')}}">Bidang Kerjasama</a></li>
                 @endcan
                 <li><a href="{{url('units')}}">Unit Kerja</a></li>
             </ul>

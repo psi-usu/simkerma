@@ -57,6 +57,9 @@ Route::put('partners/edit', 'PartnerController@update');
 Route::delete('partners/delete', 'PartnerController@destroy');
 Route::get('partners/ajax', 'PartnerController@getAjax');
 
+Route::get('areas_of_coop', 'AreaCoopController@index');
+Route::get('areas_of_coop/ajax', 'AreaCoopController@getAjax');
+
 Route::get('units', 'UnitController@index');
 Route::get('units/ajax', 'UnitController@getAjax');
 

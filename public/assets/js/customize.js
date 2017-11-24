@@ -31,7 +31,7 @@ $(document).ready(function () {
             var button_action = '<button class="btn btn-theme btn-sm rounded coop-view-btn" data-toggle="tooltip" data-placement="top" title="Lihat"><i class="fa fa-eye"></i></button>';
         }
 
-        var coopDatatable = $("#coop-list").dataTable({   
+        var coopDatatable = $("#coop-list").dataTable({
             autoWidth: false,
             responsive: true,
             ajax: baseUrl + 'cooperations/ajax',
@@ -334,6 +334,67 @@ $(document).ready(function () {
         });
     }
 
+    if ($("#area-list").length) {
+        var areaDatatable = $("#area-list").dataTable({
+            autoWidth: false,
+            responsive: true,
+            ajax: baseUrl + 'areas_of_coop/ajax',
+            columnDefs: [
+                {
+                    orderable: false,
+                    defaultContent: '<a data-toggle="tooltip" data-placement="top" title="Edit"><button class="btn btn-theme btn-sm rounded edit"><i class="fa fa-pencil" style="color:white;"></i></button></a>' +
+                    '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>',
+                    targets: 3
+                },
+                {
+                    className: "dt-center",
+                    targets: [1, 3]
+                },
+                {
+                    width: "5%",
+                    targets: 1,
+                },
+                {
+                    width: "20%",
+                    targets: [2, 3],
+                },
+                {
+                    visible: false,
+                    targets: 0,
+                },
+            ],
+        });
+
+        $(document).on("click", "#partner-list a button.delete", function (e) {
+            e.preventDefault();
+            var dt_row = $(this).closest("li").data("dt-row");
+
+            if (dt_row >= 0) {
+                var position = dt_row;
+            } else {
+                var target_row = $(this).closest("tr").get(0);
+                var position = partnerDatatable.fnGetPosition(target_row);
+            }
+            var partner_id = partnerDatatable.fnGetData(position)[0];
+
+            $("#delete form").attr("action", baseUrl + "partners/delete?id=" + partner_id);
+        });
+
+        $(document).on("click", "#partner-list a button.edit", function (e) {
+            e.preventDefault();
+            var dt_row = $(this).closest("li").data("dt-row");
+
+            if (dt_row >= 0) {
+                var position = dt_row;
+            } else {
+                var target_row = $(this).closest("tr").get(0);
+                var position = partnerDatatable.fnGetPosition(target_row);
+            }
+            var partner_id = partnerDatatable.fnGetData(position)[0];
+
+            window.open(baseUrl + "partners/edit?id=" + partner_id, "_self");
+        });
+    }
 
     if ($("#unit-list").length) {
         $("#unit-list").dataTable({
@@ -623,7 +684,9 @@ $(document).ready(function () {
         $("#MoU select[name=partner_id]").trigger("chosen:updated");
         $("#MoU select[name=form_of_coop]").val("").change();
         $("#MoU select[name=form_of_coop]").trigger("chosen:updated");
-        $("#MoU textarea[name=area_of_coop]").val("");
+        $("#MoU select[name=area_of_coop]").val("").change();
+        $("#MoU select[name=area_of_coop]").trigger("chosen:updated");
+        $("#MoU textarea[name=subject_of_coop]").val("");
         $("#MoU input[name=sign_date]").val("");
         $("#MoU input[name=end_date]").val("");
         $("#MoU input[name=usu_doc_no]").val("");
@@ -751,7 +814,7 @@ $(document).ready(function () {
             },
             success: function (data) {
                 $("input[name=mou_detail_partner_id]").val(data['partner_name']);
-                $("input[name=mou_detail_area_of_coop]").val(data['area_of_coop']);
+                $("input[name=mou_detail_subject_of_coop]").val(data['subject_of_coop']);
                 $("input[name=mou_detail_sign_date]").val(data['sign_date']);
                 $("input[name=mou_detail_end_date]").val(data['end_date']);
                 $("input[name=mou_detail_usu_doc_no]").val(data['usu_doc_no']);

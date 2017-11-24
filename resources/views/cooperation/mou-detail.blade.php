@@ -25,10 +25,24 @@
             </label>
         @endif
     </div>
+    <div class="form-group {{$errors->has('subject_of_coop') ? 'has-error' : null}}">
+        <label for="subject_of_coop" class="control-label">Subjek Kerjasama</label>
+        <textarea name="subject_of_coop" class="form-control"
+                  placeholder="Subjek Kerjasama" {{$disabled}}>{{$cooperation['subject_of_coop']}}</textarea>
+        @if($errors->has('subject_of_coop'))
+            <label class="error" style="display: inline-block;">
+                {{$errors->first('subject_of_coop')}}
+            </label>
+        @endif
+    </div>
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
         <label for="area_of_coop" class="control-label">Bidang Kerjasama</label>
-        <textarea name="area_of_coop" class="form-control"
-                  placeholder="Bidang Kerjasama" {{$disabled}}>{{$cooperation['area_of_coop']}}</textarea>
+        <select class="form-control mb-15 select2" name='partner_id' {{$disabled}} data-placeholder="-- Pilih Bidang Kerjasama --" >
+            <option value="" disabled selected>-- Pilih Bidang Kerjasama --</option>
+            @foreach($areas as $area)
+                <option value="{{$area->id}}" {{$cooperation['area_of_coop'] == $area->id ? 'selected' : null}}>{{$area->area_coop}}</option>
+            @endforeach
+        </select>
         @if($errors->has('area_of_coop'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('area_of_coop')}}

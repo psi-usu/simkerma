@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Approval;
+use App\AreasCoop;
 use App\Cooperation;
 use App\CoopItem;
 use App\CoopType;
@@ -55,7 +56,7 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-           // $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->identity = env('LOGIN_USERNAME');
             $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
@@ -120,7 +121,7 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-           // $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->identity = env('LOGIN_USERNAME');
             $login->payload->identity = env('USERNAME_LOGIN');
         } else
         {
@@ -155,7 +156,7 @@ class CooperationController extends MainController {
             Auth::login($user);
 
             $this->setUserInfo();
-            
+
             $page_title = 'Kerjasama Segera Berakhir';
 
             $user_auth = UserAuth::where('username',$this->user_info['username'])->get();
@@ -239,7 +240,6 @@ class CooperationController extends MainController {
 
         $user_auth = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
 
-
         if($user_auth->isNotEmpty()){
             $isOperator = true;
         }
@@ -267,6 +267,8 @@ class CooperationController extends MainController {
             }
         }
 
+        $areas = AreasCoop::get();
+
         return view('cooperation.coop-detail', compact(
             'page_title',
             'upd_mode',
@@ -278,7 +280,8 @@ class CooperationController extends MainController {
             'units',
             'coop_items',
             'isSuper',
-            'isOperator'
+            'isOperator',
+            'areas'
         ));
     }
 
@@ -390,7 +393,7 @@ class CooperationController extends MainController {
     public function storeTemp(Request $request)
     {
         $input = Input::all();
-        
+
         DB::transaction(function () use ($input, $request) {
             $cooperation = $this->moveCorresponding($input);
             $cooperation['created_by'] = Auth::user()->username;
@@ -426,7 +429,7 @@ class CooperationController extends MainController {
                         $coop_item->item_name = $input['item_name'][$key];
                         $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
                         $coop_item->item_uom = $input['item_uom'][$key];
-                        
+
                         if(isset($input['item_total_amount'][$key])){
                             $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
                         }else{
@@ -709,7 +712,7 @@ class CooperationController extends MainController {
 
     public function update(StoreCooperationRequest $request)
     {
-        $this->authorize('update', Cooperation::class);
+        // $this->authorize('update', Cooperation::class);
 
         $input = Input::all();
 

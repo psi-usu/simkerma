@@ -20,7 +20,7 @@
             @foreach($mou_coops as $mou_coop)
                 <option value="{{$mou_coop['id']}}"
                         {{$mou_coop['id'] == $coop_id ? "selected" : null}}>
-                    {{$mou_coop['partner']['name']}} - {{$mou_coop['area_of_coop']}}
+                    {{$mou_coop['partner']['name']}} - {{$mou_coop['partner_doc_no']}}
                 </option>
             @endforeach
         </select>
@@ -41,8 +41,8 @@
         <input name="mou_detail_partner_id" class="form-control mb-15" type="text" id='instansi_kerma' disabled>
     </div>
     <div class="form-group">
-        <label for="mou_detail_area_of_coop" class="control-label"> Bidang Kerjasama</label>
-        <input name="mou_detail_area_of_coop" class="form-control mb-15" type="text" id='bid_kerma' disabled>
+        <label for="mou_detail_subject_of_coop" class="control-label"> Subjek Kerjasama</label>
+        <input name="mou_detail_subject_of_coop" class="form-control mb-15" type="text" id='bid_kerma' disabled>
     </div>
     <div class="form-group">
         <label for="mou_detail_sign_date" class="control-label">Tanggal Tanda Tangan</label>
