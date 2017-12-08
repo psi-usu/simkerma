@@ -37,7 +37,7 @@
     </div>
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
         <label for="area_of_coop" class="control-label">Bidang Kerjasama</label>
-        <select class="form-control mb-15 select2" name='partner_id' {{$disabled}} data-placeholder="-- Pilih Bidang Kerjasama --" >
+        <select class="form-control mb-15 select2" name='area_of_coop' {{$disabled}} data-placeholder="-- Pilih Bidang Kerjasama --" >
             <option value="" disabled selected>-- Pilih Bidang Kerjasama --</option>
             @foreach($areas as $area)
                 <option value="{{$area->id}}" {{$cooperation['area_of_coop'] == $area->id ? 'selected' : null}}>{{$area->area_coop}}</option>

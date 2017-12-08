@@ -30,7 +30,7 @@
                         <!-- MOU -->
                         @foreach($coop_tree_relations as $coop_relation)
                             @if($coop_relation['level'] == 1)
-                                <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id']? 'style=text-decoration: underline;' : null}}>{{\Illuminate\Support\Str::limit($coop_relation['area_of_coop'], 50)}}</a>
+                                <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id']? 'style=text-decoration: underline;' : null}}>{{\Illuminate\Support\Str::limit($coop_relation['subject_of_coop'], 50)}}</a>
                             @endif
                         @endforeach
                         @php($curr_level = 1)
@@ -52,7 +52,7 @@
                                     @if(!$first)
                                         </li>
                                     @endif
-                                    <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id']? 'style=text-decoration: underline;' : null}} >{{\Illuminate\Support\Str::limit($coop_relation['area_of_coop'], 50)}}</a>
+                                    <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id']? 'style=text-decoration: underline;' : null}} >{{\Illuminate\Support\Str::limit($coop_relation['subject_of_coop'], 50)}}</a>
                                     @php($first = false)
                                 @endif
                             @endforeach
@@ -75,7 +75,7 @@
                                     @if(!$first)
                                         </li>
                                     @endif
-                                    <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id'] ? 'style=text-decoration: underline;' : null}}>{{\Illuminate\Support\Str::limit($coop_relation['area_of_coop'], 50)}}</a>
+                                    <li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation['id'])}}" {{$coop_relation['id'] == $_GET['id'] ? 'style=text-decoration: underline;' : null}}>{{\Illuminate\Support\Str::limit($coop_relation['subject_of_coop'], 50)}}</a>
                                     @php($is_level_4 = false)
                                     @foreach($coop_tree_relations as $coop_relation_2)
                                         @if($coop_relation_2['level'] == 4 && $coop_relation_2['parent_id'] == $coop_relation['id'])
@@ -86,7 +86,7 @@
                                     @endforeach
                                     @foreach($coop_tree_relations as $coop_relation_2)
                                         @if($coop_relation_2['level'] == 4 && $coop_relation_2['parent_id'] == $coop_relation['id'])
-                                            <li>{{$coop_relation_2['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation_2['id'])}}" {{$coop_relation_2['id'] == $_GET['id'] ? "style='text-decoration: underline;font-weight:bold;'" : null}}>{{\Illuminate\Support\Str::limit($coop_relation_2['area_of_coop'], 50)}}</a></li>
+                                            <li>{{$coop_relation_2['coop_type']}} : <a href="{{url('cooperations/'.$action.'?id=' . $coop_relation_2['id'])}}" {{$coop_relation_2['id'] == $_GET['id'] ? "style='text-decoration: underline;font-weight:bold;'" : null}}>{{\Illuminate\Support\Str::limit($coop_relation_2['subject_of_coop'], 50)}}</a></li>
                                         @endif
                                     @endforeach
                                     @if($is_level_4)
@@ -109,7 +109,7 @@
                         {{--@if($is_level_4)--}}
                             {{--@foreach($coop_tree_relations as $coop_relation)--}}
                                 {{--@if($coop_relation['level'] == 4)--}}
-                                    {{--<li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/display?id=' . $coop_relation['id'])}}">{{$coop_relation['area_of_coop']}}</a></li>--}}
+                                    {{--<li>{{$coop_relation['coop_type']}} : <a href="{{url('cooperations/display?id=' . $coop_relation['id'])}}">{{$coop_relation['subject_of_coop']}}</a></li>--}}
                                 {{--@endif--}}
                             {{--@endforeach--}}
                             {{--</ul>--}}

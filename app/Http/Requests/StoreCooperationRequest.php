@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Cooperation;
 use App\GlobalClass\UserAuth;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Input;
 
 class StoreCooperationRequest extends FormRequest {
     /**
@@ -26,6 +27,7 @@ class StoreCooperationRequest extends FormRequest {
     public function rules()
     {
         $rules = [
+            'subject_of_coop'=> 'required',
             'area_of_coop'   => 'required',
             'sign_date'      => 'required',
             'end_date'       => 'required',
@@ -33,24 +35,13 @@ class StoreCooperationRequest extends FormRequest {
             'partner_doc_no' => 'required',
         ];
 
-        $cooperation_adden = Cooperation::find($this->input('cooperation_id'));
-
-        if (! is_null($cooperation_adden) && $this->input('coop_type') == 'ADDENDUM')
+        if ($this->input('coop_type') == 'MOU')
         {
-            if ($cooperation_adden->coop_type == 'MOA')
-            {
-                $rules = array_add($rules, 'implementation', 'required');
-                $rules = array_add($rules, 'unit', 'required');
-            }
-
-            if ($this->input('coop_type') == 'MOU')
-            {
-                $rules = array_add($rules, 'partner_id', 'required');
-                $rules = array_add($rules, 'form_of_coop', 'required');
-            }
+            $rules = array_add($rules, 'partner_id', 'required');
+            $rules = array_add($rules, 'form_of_coop', 'required');
         }
 
-        if($this->input('coop_type') == 'MOU' || $this->input('coop_type') == 'MOA' || $this->input('coop_type') == 'ADDENDUM'){
+        if($this->input('coop_type') == 'MOU' || $this->input('coop_type') == 'MOA'){
             $rules = array_add($rules, 'benefit', 'required');
         }
 
@@ -65,7 +56,6 @@ class StoreCooperationRequest extends FormRequest {
             $rules = array_add($rules, 'partner_id', 'required');
             $rules = array_add($rules, 'form_of_coop', 'required');
         }
-
 
         if ($this->input('coop_type') == 'MOA' || $this->input('coop_type') == 'MOU' || $this->input('coop_type') == 'SPK' ){
             $rules = array_add($rules, 'coop_type', 'required|max:10');
@@ -103,7 +93,6 @@ class StoreCooperationRequest extends FormRequest {
             'implementation.required' => 'Implementasi harus diisi',
             'unit.required'           => 'Unit harus diisi',
             'benefit.required'        => 'Manfaat harus diisi',
-//            'contract_amount.required' => 'Dokumen harus diisi',
         ];
     }
 

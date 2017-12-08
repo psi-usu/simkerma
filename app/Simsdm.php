@@ -81,11 +81,6 @@ class Simsdm {
     {
         $response = $this->client->get('http://api.usu.ac.id/1.0/users/' . $identity);
         $json = json_decode($response->getBody());
-//        foreach ($json as $key => $item)
-//        {
-//            $item = json_decode(json_encode($item), true);
-//            $json[$key] = $item;
-//        }
 
         return $json;
     }

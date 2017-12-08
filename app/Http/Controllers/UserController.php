@@ -47,13 +47,13 @@ class UserController extends MainController {
     {
         $page_title = 'User';
 
-        $auth = UserAuth::where('username',$this->user_info['username'])->get();
+        $auth = UserAuth::where('user_id',$this->user_info['user_id'])->get();
 
         if(!$auth->contains('auth_type','SU') && !$auth->contains('auth_type','SAU')){
             return abort('403');
         }
 
-        return view('user.user-list', compact('page_title'));
+        return view('user.user-list',  compact('page_title'));
     }
 
     public function getAjax()
@@ -79,7 +79,7 @@ class UserController extends MainController {
         {
             $data['data'][$i][0] = $i + 1;
             $data['data'][$i][1] = $user->username;
-            $data['data'][$i][2] = $simsdm->getEmployee($user->username)->full_name;
+            $data['data'][$i][2] = $simsdm->getEmployee($user->user_id)->full_name;
             $auths = $user_auths->filter(function ($v, $k) use ($user)
             {
                 return $v->username == $user->username;
@@ -117,7 +117,6 @@ class UserController extends MainController {
         $simsdm = new Simsdm();
         $units = $simsdm->unitAll();
 
-
         $isSuper = null;
         $authentication= null;
         $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
@@ -146,11 +145,10 @@ class UserController extends MainController {
     public function store(StoreUserRequest $request)
     {
         $user_auths = new Collection();
-        $simsdm = new Simsdm();
-        $units = $simsdm->unitAll();
         foreach ($request->input('auth_type') as $key => $item)
         {
             $user_auth = new UserAuth();
+            $user_auth->user_id = $request->user_id;
             $user_auth->username = $request->username;
             $user_auth->auth_type = $request->input('auth_type')[$key];
 
@@ -196,7 +194,7 @@ class UserController extends MainController {
       
         $isSuper = null;
         $authentication = null;
-        $user_authentication = UserAuth::where('username',$this->user_info['username'])->where('deleted_at',null)->get();
+        $user_authentication = UserAuth::where('username',$this->user_info['username'])->get();
         if($user_authentication->contains('auth_type','SU')){
             $isSuper=true;
             $authentication = 'SU';
@@ -204,13 +202,13 @@ class UserController extends MainController {
             $authentication = 'SAU';
         } elseif($user_authentication->contains('auth_type','AU')){
             $authentication = 'AU';
-        }elseif(!$user_authentication->contains('auth_type','AU')){
+        }else{
             return abort('404');
         }
 
         $user_auth = UserAuth::where('username', $input)->first();
         $user_auth->username_display = $user_auth->username;
-        $employee = $simsdm->getEmployee($user_auth->username);
+        $employee = $simsdm->getEmployee($user_auth->user_id);
         $user_auth->full_name = $employee->full_name;
 
         return view('user.user-detail', compact(
@@ -237,11 +235,10 @@ class UserController extends MainController {
         } else
         {
             $user_auths = new Collection();
-            $simsdm = new Simsdm();
-            $units = $simsdm->unitAll();
             foreach ($request->input('auth_type') as $key => $item)
             {
                 $user_auth = new UserAuth();
+                $user_auth->user_id = $request->user_id;
                 $user_auth->username = $request->username;
                 $user_auth->auth_type = $request->input('auth_type')[$key];
                 $unit = $request->input('unit')[$key];
@@ -256,7 +253,7 @@ class UserController extends MainController {
                     $user_auth->save();
                 }
             });
-            $request->session()->flash('alert-success', 'User berhasil dibuat!');
+            $request->session()->flash('alert-success', 'User berhasil diupdate!');
 
             return redirect()->intended('users');
         }
@@ -321,6 +318,7 @@ class UserController extends MainController {
         foreach ($users->data as $user)
         {
             $result = new \stdClass();
+            $result->id = $user->id;
             $result->username = $user->nip;
             $result->full_name = $user->full_name;
             $result->label = 'NIP: ' . $user->nip . ', NIDN: ' . $user->nidn . ', Nama: ' . $user->full_name;

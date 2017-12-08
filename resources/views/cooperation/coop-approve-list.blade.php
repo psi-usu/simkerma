@@ -38,6 +38,7 @@
                                     <thead>
                                     <tr>
                                         <th>No.</th>
+                                        <th>Subjek Kerjasama</th>
                                         <th>Bidang Kerjasama</th>
                                         <th>Instansi Partner</th>
                                         <th>Unit Kerjasama</th>

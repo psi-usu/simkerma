@@ -58,12 +58,16 @@ Route::delete('partners/delete', 'PartnerController@destroy');
 Route::get('partners/ajax', 'PartnerController@getAjax');
 
 Route::get('areas_of_coop', 'AreaCoopController@index');
+Route::post('areas_of_coop/create', 'AreaCoopController@store');
+Route::post('areas_of_coop/edit', 'AreaCoopController@update');
+Route::delete('areas_of_coop/delete', 'AreaCoopController@destroy');
 Route::get('areas_of_coop/ajax', 'AreaCoopController@getAjax');
 
 Route::get('units', 'UnitController@index');
 Route::get('units/ajax', 'UnitController@getAjax');
 
 Route::get('api/1.0/cooperations/search', 'ApiController@searchCoop');
+Route::get('api/1.0/partner/search', 'ApiController@searchPartner');
 Route::get('api/1.0/cooperations/{id}', 'ApiController@find');
 
 Route::get('report', 'ReportController@index');

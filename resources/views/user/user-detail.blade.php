@@ -69,6 +69,7 @@
                                     <input name="username_display" type="text" class="form-control search-employee"
                                            value="{{$user_auth['username_display']}}" required {{$upd_mode == 'create' ? null : 'disabled'}}>
                                     <input name="username" type="hidden" value="{{$user_auth['username']}}">
+                                    <input name="user_id" type="hidden" value="{{$user_auth['user_id']}}">
                                     @if($errors->has('username'))
                                         <label id="bv_required-error" class="error" for="bv_required"
                                                style="display: inline-block;">

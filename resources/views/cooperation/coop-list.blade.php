@@ -78,6 +78,7 @@
                                         <th>ID</th>
                                         <th>No.</th>
                                         <th>Subjek Kerjasama</th>
+                                        <th>Bidang Kerjasama</th>
                                         <th>Instansi Partner</th>
                                         <th>Jenis</th>
                                         <th>Bentuk</th>

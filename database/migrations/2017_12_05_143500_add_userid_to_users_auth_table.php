@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddSubjectToCoopsTable extends Migration
+class AddUseridToUsersAuthTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddSubjectToCoopsTable extends Migration
      */
     public function up()
     {
-        Schema::table('cooperations', function (Blueprint $table) {
-            $table->string('subject_of_coop')->after('coop_type')->nullable();
+        Schema::table('user_auths', function (Blueprint $table) {
+            $table->integer('user_id', false, true)->after('id');
         });
     }
 
@@ -25,8 +25,8 @@ class AddSubjectToCoopsTable extends Migration
      */
     public function down()
     {
-        Schema::table('cooperations', function (Blueprint $table) {
-            $table->dropColumn('subject_of_coop');
+        Schema::table('user_auths', function (Blueprint $table) {
+            $table->dropColumn('user_id');
         });
     }
 }

@@ -15,54 +15,26 @@
 
 <!-- SPK -->
 <div id="SPK" style='display: none !important;'>
-    <div class="form-group {{$errors->has('cooperation_id') ? 'has-error' : null}}">
-        <label for="cooperation_id" class="control-label">Pilih MOU / Nota Kesepahaman</label>
-        <select name="cooperation_id" class="form-control select2" style="width: 100%;">
-            <option value="" disabled selected>-- Pilih MOU berdasarkan Bidang Kerjasama --</option>
-            @foreach($mou_coops as $mou_coop)
-                <option value="{{$mou_coop['id']}}"
-                        {{$mou_coop['id'] == $coop_id ? "selected" : null}}>
-                    {{$mou_coop['partner']['name']}} - {{$mou_coop['area_of_coop']}}
-                </option>
-            @endforeach
-        </select>
-        @if($errors->has('cooperation_id'))
-            <label class="error" style="display: inline-block;">
-                {{$errors->first('cooperation_id')}}
-            </label>
+     {{-- <div class="form-group">
+        <label for="name" class="control-label col-xs-12">Jenis SPK</label>
+        @if($upd_mode == 'edit')
+            <input type="hidden"  name="is_accidental" value="{{$cooperation['is_accidental']}}">
         @endif
-    </div>
-    <!-- MOU INFORMATION -->
-    <div class="form-group form-group-divider">
-        <div class="form-inner">
-            <h4 class="no-margin">Informasi MOU / Nota Kesepahaman (Display Only)</h4>
+        <div class='rdio radio-inline rdio-theme rounded'>
+            <input type='radio' class='radio-inline nonaccspk' name="is_accidental" value='0' id='radio-type-rounded7'
+               required {{$cooperation['is_accidental'] == '0' ? 'checked' : null}} 
+               {{$upd_mode != 'create' ? 'disabled' : null}}>
+            <label class='control-label' for='radio-type-rounded7'>Non Accidental</label> 
+        </div>
+        <div class='rdio radio-inline rdio-theme rounded'>
+            <input type='radio' class='radio-inline accspk' name="is_accidental" id='radio-type-rounded8'
+                   required value='1' {{$cooperation['is_accidental'] == '1' ? 'checked' : null}}
+                    {{$upd_mode != 'create' ? 'disabled' : null}}>
+            <label class='control-label' for='radio-type-rounded8'>Accidental</label>
         </div>
     </div>
-    <div class="form-group">
-        <label for="mou_detail_partner_id" class="control-label">Instansi Kerjasama</label>
-        <input name="mou_detail_partner_id" class="form-control mb-15" type="text" id='instansi_kerma' disabled>
-    </div>
-    <div class="form-group">
-        <label for="mou_detail_area_of_coop" class="control-label"> Bidang Kerjasama</label>
-        <input name="mou_detail_area_of_coop" class="form-control mb-15" type="text" id='bid_kerma' disabled>
-    </div>
-    <div class="form-group">
-        <label for="mou_detail_sign_date" class="control-label">Tanggal Tanda Tangan</label>
-        <input name="mou_detail_sign_date" class="form-control" id="tgl_tanda_tangan" type="text" disabled>
-    </div>
-    <div class="form-group">
-        <label for="mou_detail_end_date" class="control-label">Tanggal Berakhir</label>
-        <input name="mou_detail_end_date" class="form-control" id="tgl_berakhir" type="text" disabled>
-    </div>
-    <div class="form-group">
-        <label for="mou_detail_usu_doc_no" class="control-label">Nomor Dokumen USU</label>
-        <input name='mou_detail_usu_doc_no' class="form-control" id="nomor_dokumen_usu" type="text" disabled>
-    </div>
-    <div class="form-group">
-        <label for="mou_detail_partner_doc_no" class="control-label">Nomor Dokumen Instansi Partner</label>
-        <input name='mou_detail_partner_doc_no' class="form-control" id="nomor_dokumen_usu" type="text" disabled>
-    </div>
-    <!-- END MOU INFORMATION -->
+ --}}
+    {{-- @include('cooperation.coop-accidental-spk') --}}
 
     <!-- SPK -->
     <div class="form-group form-group-divider">
@@ -70,10 +42,24 @@
             <h4 class="no-margin">Data SPK / Surat Perintah Kerjasama (Mohon Diisi)</h4>
         </div>
     </div>
+    <div class="form-group {{$errors->has('subject_of_coop') ? 'has-error' : null}}">
+        <label for="subject_of_coop" class="control-label">Subjek Kerjasama SPK</label>
+        <textarea name="subject_of_coop" class="form-control"
+                  placeholder="Subjek Kerjasama SPK" {{$disabled}}>{{$cooperation['subject_of_coop']}}</textarea>
+        @if($errors->has('subject_of_coop'))
+            <label class="error" style="display: inline-block;">
+                {{$errors->first('subject_of_coop')}}
+            </label>
+        @endif
+    </div>
     <div class="form-group {{$errors->has('area_of_coop') ? 'has-error' : null}}">
-        <label for="area_of_coop" class="control-label">Bidang Kerjasama SPK / Surat Perintah Kerjasama</label>
-        <textarea name="area_of_coop" class="form-control" id="bid_kerma_spk"
-                  placeholder="Bidang Kerjasama SPK / Surat Perintah Kerjasama">{{$cooperation['area_of_coop']}}</textarea>
+        <label for="area_of_coop" class="control-label">Bidang Kerjasama SPK</label>
+        <select class="form-control mb-15 select2" name='area_of_coop' {{$disabled}} data-placeholder="-- Pilih Bidang Kerjasama --" >
+            <option value="" disabled selected>-- Pilih Bidang Kerjasama --</option>
+            @foreach($areas as $area)
+                <option value="{{$area->id}}" {{$cooperation['area_of_coop'] == $area->id ? 'selected' : null}}>{{$area->area_coop}}</option>
+            @endforeach
+        </select>
         @if($errors->has('area_of_coop'))
             <label class="error" style="display: inline-block;">
                 {{$errors->first('area_of_coop')}}
@@ -243,7 +229,7 @@
                value="{{$cooperation['contract_amount'].".00"}}">
     </div>
     @if($upd_mode=='create')
-        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Saat addendum, kosongkan apabila file yang digunakan sama dengan MOA'])
+        @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Saat addendum, kosongkan apabila file yang digunakan sama dengan SPK'])
     @elseif($upd_mode=='edit' || $upd_mode=='display')
         @include('layout.input-upload', ['passing_variable' => 'file_name_ori', 'passing_description' => 'Dokumen', 'passing_error' => ' * File yang diupload harus sudah ditandatangani WR III. Kosongkan apabila file tidak berubah'])
     @endif

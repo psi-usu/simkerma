@@ -42,14 +42,14 @@ $(document).ready(function () {
                 },
                 {
                     className: "dt-center",
-                    targets: [1, 4, 5, 6, 7]
+                    targets: [1, 3, 5, 6, 9]
                 },
                 {
                     width: "5%",
                     targets: 1
                 },
                 {
-                    width: "20%",
+                    width: "10%",
                     targets: 6
                 },
                 {
@@ -87,14 +87,14 @@ $(document).ready(function () {
                 },
                 {
                     className: "dt-center",
-                    targets: [1, 4, 5, 6, 7]
+                    targets: [1, 5, 6, 7, 8]
                 },
                 {
                     width: "5%",
                     targets: 1,
                 },
                 {
-                    width: "20%",
+                    width: "10%",
                     targets: 6,
                 },
                 {
@@ -113,7 +113,7 @@ $(document).ready(function () {
             columnDefs: [
                 {
                     orderable: false,
-                    targets: 5
+                    targets: 6
                 },
                 {
                     className: "dt-center",
@@ -342,8 +342,6 @@ $(document).ready(function () {
             columnDefs: [
                 {
                     orderable: false,
-                    defaultContent: '<a data-toggle="tooltip" data-placement="top" title="Edit"><button class="btn btn-theme btn-sm rounded edit"><i class="fa fa-pencil" style="color:white;"></i></button></a>' +
-                    '<a data-toggle="tooltip" data-placement="top" data-original-title="Delete"><button class="btn btn-danger btn-sm rounded delete" data-toggle="modal" data-target="#delete"><i class="fa fa-times"></i></button></a>',
                     targets: 3
                 },
                 {
@@ -365,7 +363,7 @@ $(document).ready(function () {
             ],
         });
 
-        $(document).on("click", "#partner-list a button.delete", function (e) {
+        $(document).on("click", "#area-list a button.delete", function (e) {
             e.preventDefault();
             var dt_row = $(this).closest("li").data("dt-row");
 
@@ -373,26 +371,22 @@ $(document).ready(function () {
                 var position = dt_row;
             } else {
                 var target_row = $(this).closest("tr").get(0);
-                var position = partnerDatatable.fnGetPosition(target_row);
+                var position = areaDatatable.fnGetPosition(target_row);
             }
-            var partner_id = partnerDatatable.fnGetData(position)[0];
+            var id = areaDatatable.fnGetData(position)[0];
 
-            $("#delete form").attr("action", baseUrl + "partners/delete?id=" + partner_id);
+            $("#delete form").attr("action", baseUrl + "areas_of_coop/delete?id=" + id);
         });
 
-        $(document).on("click", "#partner-list a button.edit", function (e) {
-            e.preventDefault();
-            var dt_row = $(this).closest("li").data("dt-row");
+        $(document).on("click", "#area-list a.edit", function (e) {
+            $("#edit").modal('show');
 
-            if (dt_row >= 0) {
-                var position = dt_row;
-            } else {
-                var target_row = $(this).closest("tr").get(0);
-                var position = partnerDatatable.fnGetPosition(target_row);
-            }
-            var partner_id = partnerDatatable.fnGetData(position)[0];
+            var id = $(this).attr('data-id1');
+            var area = $(this).attr('data-id2');
 
-            window.open(baseUrl + "partners/edit?id=" + partner_id, "_self");
+            $("#edit #id").val(id);
+            $("#edit #area").val(area);
+            $("#edit form").attr("action", baseUrl + "areas_of_coop/edit");
         });
     }
 
@@ -460,15 +454,60 @@ $(document).ready(function () {
 
     if ($("input[name=coop_type]:checked").val() == "MOU") {
         toggleCoopDetail(true, false, false, false);
-    }
-    else if ($("input[name=coop_type]:checked").val() == "MOA") {
+    } else if ($("input[name=coop_type]:checked").val() == "MOA") {
         toggleCoopDetail(false, true, false, false);
-    }else if($("input[name=coop_type]:checked").val() == "SPK") {
+    } else if($("input[name=coop_type]:checked").val() == "SPK") {
         toggleCoopDetail(false, false, false, true);
-    }
-    else {
+    } else {
         toggleCoopDetail(false, false, true, false);
     }
+
+    if ($("#MoA input[name=is_accidental]:checked").val() == 0) {
+        $('#nonAccidental').show();
+        $('#nonAccidental').fadeIn('slow');
+        $('#Accidental').hide();
+    }else if ($("#MoA input[name=is_accidental]:checked").val() == 1) {
+        $('#Accidental').show();
+        $('#Accidental').fadeIn('slow');
+        $('#nonAccidental').hide();
+    }
+
+    $("#MoA .nonaccmoa").click(function () {
+        $('#nonAccidental').fadeIn('slow');
+        $('#Accidental').hide();
+    });
+
+    $("#MoA .accmoa").click(function () {
+        $('#Accidental').fadeIn('slow');
+        $('#nonAccidental').hide();
+    });   
+
+    $("#SPK .nonaccspk").click(function () {
+        $('#nonAccidentalSPK').fadeIn('slow');
+        $('#AccidentalSPK').hide();
+    });
+
+    $("#SPK .accspk").click(function () {
+        $('#AccidentalSPK').fadeIn('slow');
+        $('#nonAccidentalSPK').hide();
+    });   
+
+
+    // if($("#MoA input:radio[name=is_accidental]:checked")) {
+    //     $("#MoA input:radio[name=is_accidental]").click(function () {
+    //         if (this.value == '0') {
+    //             $('#nonAccidental').fadeIn('slow');
+    //             $('#Accidental').hide();
+    //         } else if (this.value == '1') {
+
+    //             $('#Accidental').fadeIn('slow');
+
+    //             $('#Accidental').show();
+    //             $('#nonAccidental').hide();
+    //         }
+    //     });
+    // }
+    
 
     if ($("#fileinput-mou-doc").length) {
         var cooperation_id = $("input[name=id]").attr("value");
@@ -526,6 +565,13 @@ $(document).ready(function () {
             $("#choose-moa").fadeIn("slow").find("select").val("").change().attr("disabled", false);
             $("#choose-moa").find("select").trigger("chosen: udpated");
             $("#choose-mou").hide().find("select").attr("disabled", true);
+            $("#choose-spk").hide().find("select").attr("disabled", true);
+            toggleCoopDetail(false, false, true, false);
+        } else if ($(this).val() == 'SPK') {
+            $("#choose-spk").fadeIn("slow").find("select").val("").change().attr("disabled", false);
+            $("#choose-spk").find("select").trigger("chosen: udpated");
+            $("#choose-mou").hide().find("select").attr("disabled", true);
+            $("#choose-moa").hide().find("select").attr("disabled", true);
             toggleCoopDetail(false, false, true, false);
         }
     });
@@ -537,6 +583,9 @@ $(document).ready(function () {
         } else if ($("#choose-addendum-type select[name=addendum_type]").val() == 'MOA') {
             $("#choose-moa").fadeIn("slow");
             toggleCoopDetail(false, false, true, false);
+        } else if ($("#choose-addendum-type select[name=addendum_type]").val() == 'SPK') {
+            $("#choose-spk").fadeIn("slow");
+            toggleCoopDetail(false, false, false, true);
         }
     }
     if ($("#choose-mou select[name=cooperation_id]:visible").val() > 0) {
@@ -544,6 +593,10 @@ $(document).ready(function () {
     }
     if ($("#choose-moa select[name=cooperation_id]:visible").val() > 0) {
         toggleCoopDetail(false, true, true, false);
+    }
+
+    if ($("#choose-spk select[name=cooperation_id]:visible").val() > 0) {
+        toggleCoopDetail(false, false, true, true);
     }
 
     $("#choose-mou select[name=cooperation_id]").change(function () {
@@ -586,7 +639,9 @@ $(document).ready(function () {
                 $("#MoA select[name=cooperation_id]").trigger("chosen: updated");
                 $("#MoA select[name=cooperation_id]").attr("disabled", true);
 
-                $("#MoA textarea[name=area_of_coop]").val(data['area_of_coop']);
+                $("#MoA textarea[name=subject_of_coop]").val(data['subject_of_coop']);
+                $("#MoA select[name=area_of_coop]").val(data['area_of_coop']).change();
+                $("#MoA select[name=area_of_coop]").trigger("chosen: updated");
                 $("#MoA textarea[name=implementation]").val(data['implementation']);
                 $("#MoA input[name=sign_date]").val(data['sign_date']);
                 $("#MoA input[name=end_date]").val(data['end_date']);
@@ -595,7 +650,7 @@ $(document).ready(function () {
                 $("#MoA textarea[name=benefit]").val(data['benefit']);
                 $("#MoA select[name=unit]").val(data['unit']).change();
                 $("#MoA select[name=unit]").trigger("chosen: updated");
-                $("#MoA input[name=contract_amount]").val(data['contract_amount']);
+                $("#MoA input[name=contract_amount]").val(data['contract_amount']+".00");
 
                 $.each(data.coop_items, function (k, v) {
                     if (k > 0) {
@@ -642,6 +697,79 @@ $(document).ready(function () {
         });
     }
 
+    $("#choose-spk select[name=cooperation_id]").change(function () {
+        toggleCoopDetail(false, false, true, true);
+        refreshSPKData();
+        var id = $(this).val();
+        $.ajax({
+            url: baseUrl + 'cooperations/ajax/cooperation-detail',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $("#SPK select[name=cooperation_id]").val(data['cooperation_id']).change();
+                $("#SPK select[name=cooperation_id]").trigger("chosen: updated");
+                $("#SPK select[name=cooperation_id]").attr("disabled", true);
+
+                $("#SPK textarea[name=subject_of_coop]").val(data['subject_of_coop']);
+                $("#SPK select[name=area_of_coop]").val(data['area_of_coop']).change();
+                $("#SPK select[name=area_of_coop]").trigger("chosen: updated");
+                $("#SPK textarea[name=implementation]").val(data['implementation']);
+                $("#SPK input[name=sign_date]").val(data['sign_date']);
+                $("#SPK input[name=end_date]").val(data['end_date']);
+                $("#SPK input[name=usu_doc_no]").val(data['usu_doc_no']);
+                $("#SPK input[name=partner_doc_no]").val(data['partner_doc_no']);
+                $("#SPK textarea[name=benefit]").val(data['benefit']);
+                $("#SPK select[name=unit]").val(data['unit']).change();
+                $("#SPK select[name=unit]").trigger("chosen: updated");
+                $("#SPK input[name=contract_amount]").val(data['contract_amount']+".00");
+
+                $.each(data.coop_items, function (k, v) {
+                    if (k > 0) {
+                        var $clone = $("#spk-table").find('tr.hide').clone(true).removeClass('hide table-line');
+                        $clone.find("input").attr("disabled", false);
+                        $("#spk-table").find('table').append($clone);
+                        $(":input").inputmask()
+                    }
+                });
+
+                $.each($("#spk-table input[name^=item_name]:visible"), function (k, v) {
+                    $(this).val(data.coop_items[k]['item_name']);
+                });
+                $.each($("#spk-table input[name^=item_quantity]:visible"), function (k, v) {
+                    $(this).val(data.coop_items[k]['item_quantity']);
+                });
+                $.each($("#spk-table input[name^=item_uom]:visible"), function (k, v) {
+                    $(this).val(data.coop_items[k]['item_uom']);
+                });
+                $.each($("#spk-table input[name^=item_total_amount]:visible"), function (k, v) {
+                    $(this).val(data.coop_items[k]['item_total_amount']);
+                });
+                $.each($("#spk-table input[name^=item_annotation]:visible"), function (k, v) {
+                    $(this).val(data.coop_items[k]['item_annotation']);
+                });
+            }
+        });
+    });
+
+    if ($("#choose-spk select[name=cooperation_id]").val() > 0) {
+        var id = $("#choose-spk select[name=cooperation_id]").val();
+
+        $.ajax({
+            url: baseUrl + 'cooperations/ajax/cooperation-detail',
+            dataType: "json",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                $("#SPK select[name=cooperation_id]").val(data['cooperation_id']).change();
+                $("#SPK select[name=cooperation_id]").trigger("chosen: updated");
+                $("#SPK select[name=cooperation_id]").attr("disabled", true);
+            }
+        });
+    }
+
     function toggleCoopDetail(mou, moa, addendum, spk) {
         if (mou) {
             $('#MoU').fadeIn('slow').find('input, textarea, select').attr('disabled', false);
@@ -660,6 +788,8 @@ $(document).ready(function () {
 
             $('#MoA').find('input[name^=mou_detail_], textarea[name^=mou_detail_], select[name^=mou_detail_], input[name=contract_amount], input[name^=item_]:hidden').attr('disabled', true);
         } else {
+            $('#nonAccidental').hide();
+            $('#Accidental').hide();
             $('#MoA').hide().find('input, textarea, select').attr('disabled', true);
         }
         if (addendum) {
@@ -670,11 +800,14 @@ $(document).ready(function () {
             $('#choose-addendum-type').hide().find('select').attr('disabled', false);
             $('#choose-mou').hide().find('select').attr('disabled', false);
             $('#choose-moa').hide().find('select').attr('disabled', false);
+            $('#choose-spk').hide().find('select').attr('disabled', false);
         }
         if (spk) {
             $('#SPK').fadeIn('slow').find('input, textarea, select').attr('disabled', false);
             $('#SPK').find('input[name^=mou_detail_], textarea[name^=mou_detail_], select[name^=mou_detail_], input[name=contract_amount], input[name^=item_]:hidden').attr('disabled', true);
         } else {
+            $('#nonAccidentalSPK').hide();
+            $('#AccidentalSPK').hide();
             $('#SPK').hide().find('input, textarea, select').attr('disabled', true);
         }
     }
@@ -694,6 +827,7 @@ $(document).ready(function () {
     }
 
     function refreshMOAData() {
+        $("#MoA input[name=is_accidental]").prop('checked', false);
         $("#MoA select[name=cooperation_id]").val("").change();
         $("#MoA select[name=cooperation_id]").trigger("chosen: updated");
 
@@ -717,6 +851,7 @@ $(document).ready(function () {
     }
 
     function refreshSPKData() {
+        $("#SPK input[name=is_accidental]").prop('checked', false);
         $("#SPK select[name=cooperation_id]").val("").change();
         $("#SPK select[name=cooperation_id]").trigger("chosen: updated");
 
@@ -764,7 +899,16 @@ $(document).ready(function () {
         if (element.length) {
             element.datepicker({
                 changeMonth: true,
-                changeYear: true
+                changeYear: true,
+                defaultDate: "+1w",
+                changeMonth: true,
+                numberOfMonths: 3,
+                onSelect: function(selectedDate) {
+                    var option = this.id == "from" ? "minDate" : "maxDate",
+                        instance = $(this).data("datepicker"),
+                        date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    dates.not(this).datepicker("option", option, date);
+                }
             });
         }
         i++;
@@ -773,7 +917,16 @@ $(document).ready(function () {
     if ($(".date-picker").length) {
         $(".date-picker").datepicker({
             format: 'dd-mm-yyyy',
-            forceParse: false
+            forceParse: false,
+            defaultDate: "+1w",
+            changeMonth: true,
+            numberOfMonths: 3,
+            onSelect: function(selectedDate) {
+                var option = this.id == "from" ? "minDate" : "maxDate",
+                    instance = $(this).data("datepicker"),
+                    date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                dates.not(this).datepicker("option", option, date);
+            }
         });
     }
 
@@ -825,23 +978,6 @@ $(document).ready(function () {
 
     if ($("#tambah_kerma").length) {
         $("#tambah_kerma").validate({
-            rules: {
-                "item_name[]": {
-                    required: true
-                },
-                "item_quantity[]": {
-                    required: true
-                },
-                "item_uom[]": {
-                    required: true
-                },
-                "item_total_amount[]": {
-                    required: true
-                },
-                "item_annotation[]": {
-                    required: true
-                },
-            },
             highlight: function (element) {
                 $(element).parents('.form-group').addClass('has-error has-feedback');
             },
@@ -971,7 +1107,8 @@ $(document).ready(function () {
                         var transformed = $.map(data, function (el) {
                             return {
                                 label: el.label,
-                                id: el.username,
+                                id: el.id,
+                                uname: el.username,
                                 full_name: el.full_name
                             };
                         });
@@ -980,7 +1117,8 @@ $(document).ready(function () {
                 });
             },
             select: function (event, ui) {
-                $("input[name=username]").val(ui.item.id);
+                $("input[name=user_id]").val(ui.item.id);
+                $("input[name=username]").val(ui.item.uname);
                 $("input[name=full_name]").val(ui.item.full_name);
                 $('.search-employee').trigger('change');
             }
@@ -1051,6 +1189,4 @@ $(document).ready(function () {
 
         });
     });
-
-    jQuery.scrollSpeed(100, 800);
 });

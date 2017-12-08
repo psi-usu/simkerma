@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddSubjectToCoopsTable extends Migration
+class AddIsAccidentalToCoops extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,8 @@ class AddSubjectToCoopsTable extends Migration
     public function up()
     {
         Schema::table('cooperations', function (Blueprint $table) {
-            $table->string('subject_of_coop')->after('coop_type')->nullable();
+            $table->integer('is_accidental', false, true)->after('coop_type');
+            $table->text('reason_accidental')->after('is_accidental')->nullable();
         });
     }
 
@@ -26,7 +27,8 @@ class AddSubjectToCoopsTable extends Migration
     public function down()
     {
         Schema::table('cooperations', function (Blueprint $table) {
-            $table->dropColumn('subject_of_coop');
+            $table->dropColumn('is_accidental');
+            $table->dropColumn('reason_accidental');
         });
     }
 }

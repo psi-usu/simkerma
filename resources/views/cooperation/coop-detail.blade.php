@@ -9,6 +9,7 @@
         }else{
             $cooperation['coop_type'] = 'MOA';
         }
+        $cooperation['is_accidental'] = 0;
     }
 
     $olds = session()->getOldInput();
@@ -40,7 +41,6 @@
 
     if(!isset($coop_items))
         $coop_items = new \Illuminate\Database\Eloquent\Collection();
-
     if(!isset($disabled))
         $disabled = "";
     if(!isset($is_relation))
@@ -55,6 +55,8 @@
         $rj_note = "";
     if(!isset($moa_coops))
         $moa_coops = new \App\Cooperation();
+    if(!isset($spk_coops))
+        $spk_coops = new \App\Cooperation();
     if(!isset($prev_coop))
         $prev_coop = new \App\Cooperation();
 @endphp
@@ -76,7 +78,6 @@
 
         <!-- Start body content -->
         <div class="body-content animated fadeIn">
-
             @if($upd_mode != "create")
                 @include("cooperation.coop-relation-panel")
             @endif
@@ -153,8 +154,7 @@
                                         <input type='radio' class='radio-inline' id='radio-type-rounded4'
                                                required value='ADDENDUM' name="coop_type"
                                                 {{$cooperation['coop_type'] == 'ADDENDUM' ? 'checked' : null}}
-                                                {{$upd_mode != 'create' ? 'disabled' : null}}
-                                        >
+                                                {{$upd_mode != 'create' ? 'disabled' : null}}>
                                         <label class='' for='radio-type-rounded4'>Addendum</label>
                                     </div>
                                 </div>
@@ -163,29 +163,27 @@
                                     <label for="name" class="control-label">Pilih Jenis Addendum</label>
                                     <select class="form-control mb-15" name='addendum_type' id="pilihan" required>
                                         <option value="" disabled selected>-- Pilih --</option>
-                                        {{--@if($isSuper)--}}
-                                            {{--<option value="MOU" {{$prev_coop['coop_type'] == "MOU" ? "selected" : null}}>MoU / Nota Kesepahaman</option>--}}
-                                        {{--@endif--}}
-                                        <option value="MOA" {{$prev_coop['coop_type'] == "MOA" ? "selected" : null}}>MoA / Perjanjian Kerja Sama</option>
-                                    </select>
-                                </div>
-
-                                <div id="choose-mou" class="form-group" style="display: none;">
-                                    <label for="name" class="control-label">Pilih MoU / Nota Kesepahaman</label>
-                                    <select class="form-control mb-15 select2" name='cooperation_id' id="pilihan" required>
-                                        <option value="" disabled selected>-- Pilih --</option>
-                                        @foreach($mou_coops as $mou_coop)
-                                            <option value="{{$mou_coop['id']}}" {{$cooperation['cooperation_id'] == $mou_coop['id'] ? "selected" : null}}>{{$mou_coop['area_of_coop']}}</option>
-                                        @endforeach
+                                        <option value="MOA" {{$prev_coop['coop_type'] == "MOA" ? "selected" : null}}>MoA / Perjanjian Kerjasama</option>
+                                        <option value="SPK" {{$prev_coop['coop_type'] == "SPK" ? "selected" : null}}>SPK / Surat Perjanjian Kerjasama</option>
                                     </select>
                                 </div>
 
                                 <div id="choose-moa" class="form-group" style="display: none;">
-                                    <label for="name" class="control-label">Pilih MoA / Perjanjian Kerja Sama</label>
+                                    <label for="name" class="control-label">Pilih MoA / Perjanjian Kerjasama</label>
                                     <select class="form-control mb-15 select2" name='cooperation_id' id="pilihan" {{!empty($moa_coops) ? "disabled" : null}} required>
                                         <option value="" disabled selected>-- Pilih --</option>
                                         @foreach($moa_coops as $moa_coop)
-                                            <option value="{{$moa_coop['id']}}" {{$cooperation['cooperation_id'] == $moa_coop['id'] ? "selected" : null}}>{{$moa_coop['area_of_coop']}}</option>
+                                            <option value="{{$moa_coop['id']}}" {{$cooperation['cooperation_id'] == $moa_coop['id'] ? "selected" : null}}>{{$moa_coop['subject_of_coop']}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div id="choose-spk" class="form-group" style="display: none;">
+                                    <label for="name" class="control-label">Pilih SPK / Surat Perjanjian Kerjasama</label>
+                                    <select class="form-control mb-15 select2" name='cooperation_id' id="pilihan" {{!empty($spk_coops) ? "disabled" : null}} required>
+                                        <option value="" disabled selected>-- Pilih --</option>
+                                        @foreach($spk_coops as $spk_coop)
+                                            <option value="{{$spk_coop['id']}}" {{$cooperation['cooperation_id'] == $spk_coop['id'] ? "selected" : null}}>{{$spk_coop['subject_of_coop']}}</option>
                                         @endforeach
                                     </select>
                                 </div>

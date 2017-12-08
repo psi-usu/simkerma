@@ -11,6 +11,9 @@ class Cooperation extends Model {
         'partner_id',
         'cooperation_id',
         'coop_type',
+        'is_accidental',
+        'accidental_id',
+        'subject_of_coop',
         'area_of_coop',
         'sign_date',
         'end_date',
@@ -47,8 +50,18 @@ class Cooperation extends Model {
         return $this->hasOne(StatusCode::class, 'code', 'status');
     }
 
+    public function accidental()
+    {
+        return $this->hasOne(Accidental::class, 'id', 'accidental_id');
+    }
+
     public function partner()
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    public function areaCoop()
+    {
+        return $this->hasOne(AreasCoop::class, 'id', 'area_of_coop');
     }
 }

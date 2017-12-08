@@ -4,6 +4,9 @@
     <div class="clearfix"></div>
     @if($isOperator)
         @if($disabled == null)
+            @if(isset($cooperation['file_name']))
+                <p>File yang telah tersimpan : <a href="{{url('cooperations/download-document?id=' . $cooperation->id)}}" class="btn btn-theme rounded btn-xs btn-slideright" title="{{$cooperation->file_name_ori}}"><i class="fa fa-download" aria-hidden="true"></i> {{\Illuminate\Support\Str::limit($cooperation->file_name_ori, 25)}}</a></p>
+            @endif
             <input name="{{$passing_variable}}" id="fileinput-upload" type="file" class="file" accept=".pdf">
             @if($errors->has($passing_variable))
                 <label class="error" style="display: inline-block;">
@@ -12,7 +15,7 @@
             @endif
         @else
             @if(isset($cooperation[$passing_variable]))
-                <a href="{{url('cooperations/download-document?id=' . $cooperation->id)}}" class="btn btn-theme rounded btn-slideright">Download</a>
+                <a href="{{url('cooperations/download-document?id=' . $cooperation->id)}}" class="btn btn-theme rounded btn-slideright" title="{{$cooperation->file_name_ori}}"><i class="fa fa-download" aria-hidden="true"></i> {{\Illuminate\Support\Str::limit($cooperation->file_name_ori, 25)}}</a>
             @else
                 <a class="btn btn-theme rounded btn-slideright" disabled>Download</a><p class="text-danger"> File belum diupload</p>
             @endif

@@ -23,6 +23,7 @@ class IsAuth {
             $user = new User();
            // $user->username = env('LOGIN_USERNAME');
             $user->username = env('USERNAME_LOGIN');
+            $user->user_id = env('ID_LOGIN');
             Auth::login($user);
 
             return $next($request);
@@ -54,6 +55,8 @@ class IsAuth {
         {
             $user = new User();
             $user->username = $login->payload->identity;
+            $user->user_id = $login->payload->user_id;
+
             Auth::login($user);
 
             return $next($request);

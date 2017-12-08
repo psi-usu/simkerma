@@ -6,6 +6,7 @@ use App\Simsdm;
 use App\UserAuth;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use View;
 
@@ -149,10 +150,11 @@ class MainController extends Controller {
         if (Auth::user())
         {
             $simsdm = new Simsdm();
-            $user = $simsdm->getEmployee(Auth::user()->username);
+            $user = $simsdm->getEmployee(Auth::user()->user_id);
 
             if (isset($user)){
                 $this->user_info = [
+                    'user_id' => Auth::user()->user_id,
                     'username'  => Auth::user()->username,
                     'full_name' => $user->full_name,
                     'photo'     => $user->photo
@@ -162,10 +164,10 @@ class MainController extends Controller {
         View::share('user_info', $this->user_info);
     }
 
-    public function isAdmin($username)
+    public function isAdmin($user_id)
     {
         $check=false;
-        $user = UserAuth::where('username',$username)->where('auth_type','SU')->orWhere('auth_type','SAU')->first();
+        $user = UserAuth::where('user_id',$user_id)->where('auth_type','SU')->orWhere('auth_type','SAU')->first();
 
         if(isset($user)){
             $check=true;
@@ -173,10 +175,10 @@ class MainController extends Controller {
         return $check;
     }
 
-    public function isOthers($username)
+    public function isOthers($user_id)
     {
         $check=false;
-        $user = UserAuth::where('username',$username)->first();
+        $user = UserAuth::where('user_id',$user_id)->first();
 
         if(empty($user)){
             $check=true;
@@ -184,14 +186,20 @@ class MainController extends Controller {
         return $check;
     }
 
-    public function isUnit($username)
+    public function isUnit($user_id)
     {
         $check=false;
-        $user = UserAuth::where('username',$username)->where('auth_type','SU')->orWhere('auth_type','AU')->first();
+        $user = UserAuth::where('user_id',$user_id)->where('auth_type','SU')->orWhere('auth_type','AU')->first();
 
         if(isset($user)){
             $check=true;
         }
         return $check;
+    }
+
+    public function getUserAuth()
+    {
+        $user_auth = UserAuth::select('auth_type','user_id','username','unit')->where('user_id',$this->user_info['user_id'])->get();
+        return $user_auth;
     }
 }

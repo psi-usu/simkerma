@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cooperation;
+use App\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Input;
@@ -68,5 +69,33 @@ class ApiController extends MainController
         $results = json_encode($results, JSON_PRETTY_PRINT);
 
         return response($results, 200)->header('Content-Type', 'application/json');
+    }
+
+    public function searchPartner()
+    {
+        $data = [];
+        $i = 0;
+
+        if(Input::get('get')=='all'){
+            $partners = Partner::get();
+        }elseif(Input::get('id')){
+            $partners = Partner::where('id', Input::get('id'))->get();
+        }
+
+        foreach ($partners as $partner){
+            $data['data'][$i]['id'] = $partner->id;
+            $data['data'][$i]['nama'] = $partner->name;
+            $data['data'][$i]['alamat'] = $partner->address;
+            $i++;
+        }
+
+        $count_data = count($data);
+        if ($count_data == 0)
+        {
+            $data['data'] = [];
+        }
+        $data = json_encode($data, JSON_PRETTY_PRINT);
+
+        return response($data, 200)->header('Content-Type', 'application/json');
     }
 }
