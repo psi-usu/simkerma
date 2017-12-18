@@ -15,7 +15,7 @@
 
 <!-- SPK -->
 <div id="SPK" style='display: none !important;'>
-     {{-- <div class="form-group">
+     <div class="form-group">
         <label for="name" class="control-label col-xs-12">Jenis SPK</label>
         @if($upd_mode == 'edit')
             <input type="hidden"  name="is_accidental" value="{{$cooperation['is_accidental']}}">
@@ -33,8 +33,8 @@
             <label class='control-label' for='radio-type-rounded8'>Accidental</label>
         </div>
     </div>
- --}}
-    {{-- @include('cooperation.coop-accidental-spk') --}}
+
+    @include('cooperation.coop-accidental-spk')
 
     <!-- SPK -->
     <div class="form-group form-group-divider">

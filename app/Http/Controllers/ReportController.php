@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AreasCoop;
 use App\Cooperation;
 use App\Partner;
 use App\Simsdm;
@@ -58,7 +59,10 @@ class ReportController extends MainController
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
-            $login->payload->identity = env('LOGIN_USERNAME');
+             // $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->user_id = env('LOGIN_ID');
+            $login->payload->identity = env('USERNAME_LOGIN');
+            $login->payload->user_id = env('ID_LOGIN');
         } else
         {
             $login = JWTAuth::communicate('https://akun.usu.ac.id/auth/listen', @$_COOKIE['ssotok'], function ($credential)
@@ -86,19 +90,25 @@ class ReportController extends MainController
             ]);
 
             return view('landing-page', compact('login_link'));
-        } else
-        {
+        } else{
             $user = new User();
             $user->username = $login->payload->identity;
+            $user->user_id = $login->payload->user_id;
             Auth::login($user);
 
             $this->setUserInfo();
+
             $page_title = 'Filter';
             $partners = Partner::all();
+            $areas = AreasCoop::get();
+            $simsdm = new Simsdm();
+            $units = $simsdm->unitAll();
 
             return view('cooperation.cooperation-report', compact(
                 'page_title',
-                'partners'
+                'partners',
+                'areas',
+                'units'
             ));
         }
     }
@@ -164,7 +174,7 @@ class ReportController extends MainController
                 $data[$i]['partner']= "";
             }
             $data[$i]['coop_type'] = $coop->coop_type;
-            $data[$i]['area_of_coop'] = $coop->area_of_coop;
+            $data[$i]['subject_of_coop'] = $coop->subject_of_coop;
             $data[$i]['unit'] = $unit;
             $data[$i]['sign_date'] = date('d-m-Y', strtotime($coop->sign_date));
             $data[$i]['end_date'] = date('d-m-Y', strtotime($coop->end_date));
@@ -232,15 +242,15 @@ class ReportController extends MainController
                 $data[$i]['Partner']= "";
             }
             $data[$i]['Jenis Kerja Sama'] = $coop->coop_type;
-            $data[$i]['Bidang Kerjasama'] = $coop->area_of_coop;
+            $data[$i]['Subjek Kerjasama'] = $coop->subject_of_coop;
             $data[$i]['Unit'] = $unit;
             $data[$i]['Tanggal Tanda Tangan'] = date('d-m-Y', strtotime($coop->sign_date));
             $data[$i]['Tanggal Berakhir Kerjasama'] = date('d-m-Y', strtotime($coop->end_date));
 
             $i++;
         }
-
-        return Excel::create('Laporan Kerjasama', function($excel) use ($data) {
+        $date = date('d-m-Y');
+        return Excel::create('Laporan_Kerjasama_'.$date, function($excel) use ($data) {
 
             $excel->sheet('mySheet', function($sheet) use ($data)
             {
@@ -260,6 +270,6 @@ class ReportController extends MainController
                     $sheet->appendRow($kerma);
                 }
             });
-        })->download('xls');
+        })->download('xlsx');
     }
 }

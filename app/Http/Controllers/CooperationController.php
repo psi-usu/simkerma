@@ -57,6 +57,7 @@ class CooperationController extends MainController {
             $login->logged_in = true;
             $login->payload = new \stdClass();
             // $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->user_id = env('LOGIN_ID');
             $login->payload->identity = env('USERNAME_LOGIN');
             $login->payload->user_id = env('ID_LOGIN');
         } else
@@ -123,6 +124,8 @@ class CooperationController extends MainController {
             $login = new \stdClass();
             $login->logged_in = true;
             $login->payload = new \stdClass();
+            // $login->payload->identity = env('LOGIN_USERNAME');
+            // $login->payload->user_id = env('LOGIN_ID');
             $login->payload->identity = env('USERNAME_LOGIN');
             $login->payload->user_id = env('ID_LOGIN');
         } else
@@ -416,34 +419,36 @@ class CooperationController extends MainController {
                 ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'SPK' || $cooperation->coop_type == 'SPK') ||
                 ($cooperation->coop_type == 'ADDENDUM' && $relation_coop->coop_type == 'MOA' || $cooperation->coop_type == 'MOA')
             ){
-                if (!empty(($input['item_name'][0])))
-                {
-                    $coop_items = new Collection();
-                    foreach ($input['item_name'] as $key => $item)
+                if(isset($input['item_name'][0])){
+                    if (!empty(($input['item_name'][0])))
                     {
-                        if (!isset($cooperation->id))
+                        $coop_items = new Collection();
+                        foreach ($input['item_name'] as $key => $item)
                         {
-                            $coop_item = new CoopItem();
-                        }
-                        else{
-                            $cooperation->coopItem()->delete();
-                            $coop_item = new CoopItem();
-                        }
+                            if (!isset($cooperation->id))
+                            {
+                                $coop_item = new CoopItem();
+                            }
+                            else{
+                                $cooperation->coopItem()->delete();
+                                $coop_item = new CoopItem();
+                            }
 
-                        $coop_item->item = $key+1;
-                        $coop_item->item_name = $input['item_name'][$key];
-                        $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
-                        $coop_item->item_uom = $input['item_uom'][$key];
+                            $coop_item->item = $key+1;
+                            $coop_item->item_name = $input['item_name'][$key];
+                            $coop_item->item_quantity = str_replace(',', '', $input['item_quantity'][$key]);
+                            $coop_item->item_uom = $input['item_uom'][$key];
 
-                        if(isset($input['item_total_amount'][$key])){
-                            $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
-                        }else{
-                            $coop_item->item_total_amount = 0;
+                            if(isset($input['item_total_amount'][$key])){
+                                $coop_item->item_total_amount = str_replace(',', '', $input['item_total_amount'][$key]);
+                            }else{
+                                $coop_item->item_total_amount = 0;
+                            }
+
+                            $coop_item->item_annotation = $input['item_annotation'][$key];
+                            $cooperation->contract_amount += $coop_item->item_total_amount;
+                            $coop_items->add($coop_item);
                         }
-
-                        $coop_item->item_annotation = $input['item_annotation'][$key];
-                        $cooperation->contract_amount += $coop_item->item_total_amount;
-                        $coop_items->add($coop_item);
                     }
                 }
             }
@@ -1509,7 +1514,7 @@ class CooperationController extends MainController {
                 if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' &&
                     $key != 'item_name' && $key != 'item_quantity' && $key != 'item_uom' &&
                     $key != 'item_total_amount' && $key != 'item_annotation' &&
-                    $key != 'is_sub_unit' && $key!='approve' && $key!='reason'
+                    $key != 'is_sub_unit' && $key!='approve'
                 )
                     $ret[$key] = $item;
             }
@@ -1532,7 +1537,7 @@ class CooperationController extends MainController {
                     if ($key != '_method' && $key != '_token' && $key != 'file_name_ori' &&
                         $key != 'item_name' && $key != 'item_quantity' && $key != 'item_uom' &&
                         $key != 'item_total_amount' && $key != 'item_annotation' &&
-                        $key != 'addendum_type' && $key!='approve' && $key!='reason'
+                        $key != 'addendum_type' && $key!='approve'
                     )
                         $ret[$key] = $item;
                 }

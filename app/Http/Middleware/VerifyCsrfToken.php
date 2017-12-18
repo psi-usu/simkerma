@@ -15,6 +15,7 @@ class VerifyCsrfToken extends BaseVerifier
 //        'partner/*',
         '/cooperations/*',
         '/report',
-//        'users/*',
+       'areas_of_coop/*',
+       'users/*'
     ];
 }

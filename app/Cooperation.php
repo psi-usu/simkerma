@@ -12,7 +12,7 @@ class Cooperation extends Model {
         'cooperation_id',
         'coop_type',
         'is_accidental',
-        'accidental_id',
+        'reason_accidental',
         'subject_of_coop',
         'area_of_coop',
         'sign_date',

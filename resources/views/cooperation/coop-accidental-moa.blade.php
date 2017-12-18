@@ -82,13 +82,13 @@
             </label>
         @endif
     </div>
-    <div class="form-group {{$errors->has('reason') ? 'has-error' : null}}">
-        <label for="reason" class="control-label">Alasan dibuat Accidental</label>
-        <textarea name="reason" class="form-control"
-                  placeholder="Alasan dibuat Accidental" {{$disabled}} required>{{$cooperation['reason']}}</textarea>
-        @if($errors->has('reason'))
+    <div class="form-group {{$errors->has('reason_accidental') ? 'has-error' : null}}">
+        <label for="reason_accidental" class="control-label">Alasan dibuat Accidental</label>
+        <textarea name="reason_accidental" class="form-control"
+                  placeholder="Alasan dibuat Accidental" {{$disabled}} required>{{$cooperation['reason_accidental']}}</textarea>
+        @if($errors->has('reason_accidental'))
             <label class="error" style="display: inline-block;">
-                {{$errors->first('reason')}}
+                {{$errors->first('reason_accidental')}}
             </label>
         @endif
     </div>

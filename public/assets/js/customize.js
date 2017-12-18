@@ -914,12 +914,22 @@ $(document).ready(function () {
         i++;
     }
 
+    if ($(".date-own").length) {
+        $('.date-own').datepicker({
+            
+        viewMode: 'months',
+        format: 'yyyy',
+        autoclose: true,
+        });
+    }
+
     if ($(".date-picker").length) {
         $(".date-picker").datepicker({
             format: 'dd-mm-yyyy',
             forceParse: false,
             defaultDate: "+1w",
             changeMonth: true,
+            autoclose: true,
             numberOfMonths: 3,
             onSelect: function(selectedDate) {
                 var option = this.id == "from" ? "minDate" : "maxDate",
@@ -1153,7 +1163,7 @@ $(document).ready(function () {
                                 "<td><b>No</b></td>" +
                                 "<td><b>Instansi / Unit </b></td>" +
                                 "<td><b>Jenis Kerjasama</b></td>" +
-                                "<td><b>Bidang Kerjasama</b></td>" +
+                                "<td><b>Subjek Kerjasama</b></td>" +
                                 "<td><b>Unit Pelaksana</b></td>" +
                                 "<td><b>Tanggal Tanda Tangan</b></td>" +
                                 "<td><b>Tanggal Berakhir Kerjasama</b></td>" +
@@ -1166,7 +1176,7 @@ $(document).ready(function () {
                     tr += '<tr><td>'+ item.no+ '</td>'+
                             '<td>'+ item.partner+ '</td>'+
                             '<td>'+ item.coop_type+ '</td>'+
-                            '<td>'+ item.area_of_coop+ '</td>'+
+                            '<td>'+ item.subject_of_coop+ '</td>'+
                             '<td>'+ item.unit+ '</td>'+
                             '<td>'+ item.sign_date+ '</td>'+
                             '<td>'+ item.end_date+ '</td>'+
